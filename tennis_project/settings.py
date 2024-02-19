@@ -73,12 +73,17 @@ WSGI_APPLICATION = 'tennis_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
+DATABASES = {   
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'myTennis',
+        'USER': 'root',
+        'PASSWORD': 'Kwdikos12!@',
+        'HOST': 'localhost',  # Or the hostname of your MySQL server
+        'PORT': '3306',       # Or the port MySQL is listening on
     }
 }
+
 
 
 # Password validation
