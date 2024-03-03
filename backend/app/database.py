@@ -3,21 +3,19 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from fastapi import HTTPException
 
-
-
 encoded_password = "Kwdikos12!@".replace("@", "%40")
 DATABASE_URL = f"postgresql://postgres:{encoded_password}@127.0.0.1:5432/myTennis"
 
 engine = create_engine(DATABASE_URL)
 print("Engine created")
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-print("Session local created")
-
 
 def get_db():
     print("Getting db...")
     try:
+        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+        print("Session local created")
+
         db = SessionLocal()
         yield db
     except Exception as e:
