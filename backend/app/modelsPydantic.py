@@ -60,3 +60,24 @@ class AthleteCreate(BaseModel):
         if value is not None and value not in valid_skill_levels:
             raise ValueError(f'Invalid skill level. Must be one of: {", ".join(valid_skill_levels)}')
         return value
+    
+    
+    
+class VenueCreate(BaseModel):
+    venue_name: str = Field(..., max_length=100)
+    venue_city: str = Field(..., max_length=100)
+    venue_address: str = Field(..., max_length=100)
+    surface_type: str = Field(..., max_length=10)
+    google_maps_url: Optional[str] = Field(None, max_length=255)
+    photo_url: Optional[str] = Field(None, max_length=255)
+    
+    class Config:
+        orm_mode = True
+        
+    @validator('surface_type')
+    def validate_surface_type(cls, value):
+        valid_surface_types = ['Hard', 'Grass', 'Clay']
+        if value not in valid_surface_types:
+            raise ValueError(f'Invalid surface type. Must be one of: {", ".join(valid_surface_types)}')
+        return value
+    
