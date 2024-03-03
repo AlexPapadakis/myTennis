@@ -18,18 +18,18 @@ def read_user(db: Session = Depends(get_db)):
     users = db.query(User).all()
     if users is None:
         raise HTTPException(status_code=404, detail="Users not found")
-    return {"users": users}
+    return users
 
 
-@router.get("/user/{user_id}")
+@router.get("/users/{user_id}")
 def read_user(user_id: int, db: Session = Depends(get_db)):
     print("Reading user with id: ", user_id, "...")
     user = db.query(User).filter(User.id == user_id).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    return {"user": user}
+    return user
 
-@router.post("/user/")
+@router.post("/users/")
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
     print("Creating user...")
     db_user = User(**user.model_dump())
@@ -38,7 +38,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db.refresh(db_user)
     return {"user": db_user}
 
-@router.put("/user/{user_id}")
+@router.put("/users/{user_id}")
 def update_user(user_id: int, user: UserCreate, db: Session = Depends(get_db)):
     print("Updating user with id: ", user_id, "...")
     db_user = db.query(User).filter(User.id == user_id).first()
@@ -53,7 +53,7 @@ def update_user(user_id: int, user: UserCreate, db: Session = Depends(get_db)):
     return {"user": db_user}
 
 
-@router.delete("/user/{user_id}")
+@router.delete("/users/{user_id}")
 def delete_user(user_id: int, db: Session = Depends(get_db)):
     print("Deleting user with id: ", user_id, "...")
     db_user = db.query(User).filter(User.id == user_id).first()

@@ -3,6 +3,7 @@ from app.database import engine
 import app.models as models
 from app.routes.user import router as user_router
 from app.routes.venue import router as venue_router
+from app.routes.athlete import router as athlete_router
 
 def initialize_app():
     models.Base.metadata.create_all(bind=engine)
@@ -13,6 +14,7 @@ def initialize_app():
     
     app.include_router(user_router)
     app.include_router(venue_router)
+    app.include_router(athlete_router)
     print("Router included")
 
 
