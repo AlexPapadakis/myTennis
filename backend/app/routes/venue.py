@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from ..models import Venue
-from ..modelsPydantic import VenueCreate
+from ..schemas import Venue
+from ..models import VenueCreate
 from ..database import get_db
 
 

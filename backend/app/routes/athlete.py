@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..database import get_db
-from ..models import Athlete
-from ..modelsPydantic import AthleteCreate
+from ..schemas import Athlete
+from ..models import AthleteCreate
 
 router = APIRouter()
 

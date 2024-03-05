@@ -1,127 +1,128 @@
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Date, Time,TIMESTAMP, CheckConstraint, func,DECIMAL, create_engine,ForeignKey,PrimaryKeyConstraint
-from sqlalchemy.orm import relationship
+import datetime
+from decimal import Decimal
+import time
+from pydantic import BaseModel, constr, EmailStr, Field, validator
+from datetime import date
+from typing import Optional
+from pydantic import condecimal
+from datetime import time,datetime
 
 
-Base = declarative_base()
-
-# Define models for your tables
-class User(Base):
-    __tablename__ = 'User'
-    id = Column(Integer, primary_key=True)
-    username = Column(String(50), unique=True, nullable=False)
-    email = Column(String(100), unique=True, nullable=False)
-    password = Column(String(255), nullable=False)
-    real_name = Column(String(50))
-    gender = Column(String(10), CheckConstraint("gender IN ('Male', 'Female', 'Other')"))
-    phone = Column(String(20))
-    birthday = Column(Date)
-    address = Column(String(255))
-    city = Column(String(100))
-    postal_code = Column(String(20))
-    photo_url = Column(String(255))
-    created_at = Column(TIMESTAMP, server_default=func.now())
+class UserCreate(BaseModel):
+    username: str = Field(..., max_length=50)
+    email: EmailStr
+    password: str = Field(..., max_length=255)
+    real_name: Optional[str] = Field(None, max_length=50)
+    gender: Optional[str] 
+    phone: Optional[str] = Field(None, max_length=20)
+    birthday: Optional[date]
+    address: Optional[str] = Field(None, max_length=255)
+    city: Optional[str] = Field(None, max_length=100)
+    postal_code: Optional[str] = Field(None, max_length=20)
+    photo_url: Optional[str] = Field(None, max_length=255)
     
-    def __repr__(self):
-        return f"<User(id={self.id}, username='{self.username}'>"
+    class Config:
+        orm_mode = True
+    
+    @validator('gender')
+    def validate_gender(cls, value):
+        valid_genders = ['Male', 'Female', 'Other']
+        if value is not None and value not in valid_genders:
+            raise ValueError(f'Invalid gender. Must be one of: {", ".join(valid_genders)}')
+        return value
+    
+    
+class AthleteCreate(BaseModel):
+    user_id: int
+    handedness: Optional[str] = Field(None, max_length=20)
+    height: Optional[Decimal] = Field(None, gt=0, le=999.99)
+    weight: Optional[Decimal] = Field(None, gt=0, le=999.99)
+    backhand_type: Optional[str] = Field(None, max_length=20)
+    skill_level: Optional[str] = Field(None, max_length=20)
+    points: Optional[int]
+    
+    class Config:
+        orm_mode = True
+        
+    @validator('handedness')
+    def validate_handedness(cls, value):
+        valid_handedness = ['Right-handed', 'Left-handed']
+        if value is not None and value not in valid_handedness:
+            raise ValueError(f'Invalid handedness. Must be one of: {", ".join(valid_handedness)}')
+        return value
+    
+    @validator('backhand_type')
+    def validate_backhand_type(cls, value):
+        valid_backhand_types = ['One-handed', 'Two-handed']
+        if value is not None and value not in valid_backhand_types:
+            raise ValueError(f'Invalid backhand type. Must be one of: {", ".join(valid_backhand_types)}')
+        return value
+    
+    @validator('skill_level')
+    def validate_skill_level(cls, value):
+        valid_skill_levels = ['Beginner', 'Intermediate', 'Advanced']
+        if value is not None and value not in valid_skill_levels:
+            raise ValueError(f'Invalid skill level. Must be one of: {", ".join(valid_skill_levels)}')
+        return value
+    
+    
+    
+class VenueCreate(BaseModel):
+    venue_name: str = Field(..., max_length=100)
+    venue_city: str = Field(..., max_length=100)
+    venue_address: str = Field(..., max_length=100)
+    surface_type: str = Field(..., max_length=10)
+    google_maps_url: Optional[str] = Field(None, max_length=255)
+    photo_url: Optional[str] = Field(None, max_length=255)
+    
+    class Config:
+        orm_mode = True
+        
+    @validator('surface_type')
+    def validate_surface_type(cls, value):
+        valid_surface_types = ['Hard', 'Grass', 'Clay']
+        if value not in valid_surface_types:
+            raise ValueError(f'Invalid surface type. Must be one of: {", ".join(valid_surface_types)}')
+        return value
     
 
-class Athlete(Base):
-    __tablename__ = 'Athlete'
-
-    user_id = Column(Integer,  ForeignKey('User.id'), primary_key=True)
-    handedness = Column(String(20))
-    height = Column(DECIMAL(5, 2))
-    weight = Column(DECIMAL(5, 2))
-    backhand_type = Column(String(20))
-    skill_level = Column(String(20))
-    points = Column(Integer)
+class MatchCreate(BaseModel):
+    date: Optional[date]
+    venue_id: Optional[int]
+    state: Optional[str] = Field(None, max_length=20)
+    winner_id: Optional[int]
+    player1_id: Optional[int]
+    player2_id: Optional[int]
     
-    user = relationship("User")
-    __table_args__ = (
-        CheckConstraint("handedness IN ('Right-handed', 'Left-handed')"),
-        CheckConstraint("backhand_type IN ('One-handed', 'Two-handed')"),
-        CheckConstraint("skill_level IN ('Beginner', 'Intermediate', 'Advanced')")
-    )
-
-    def __repr__(self):
-        return f"<Athlete(user_id={self.user_id}, handedness='{self.handedness}', height={self.height}, weight={self.weight}, backhand_type='{self.backhand_type}', skill_level='{self.skill_level}', points={self.points})>"
-
-
-class Venue(Base):
-    __tablename__ = 'Venue'
-
-    venue_id = Column(Integer, primary_key=True, autoincrement=True)
-    venue_name = Column(String(100))
-    venue_city = Column(String(100))
-    venue_address = Column(String(100))
-    surface_type = Column(String(10), CheckConstraint("surface_type IN ('Hard', 'Grass', 'Clay')"))
-    google_maps_url = Column(String(255))
-    photo_url = Column(String(255))
+    class Config:
+        orm_mode = True
+        
+    @validator('state')
+    def validate_state(cls, value):
+        valid_states = ['Upcoming', 'Completed']
+        if value is not None and value not in valid_states:
+            raise ValueError(f'Invalid state. Must be one of: {", ".join(valid_states)}')
+        return value
     
-    def __repr__(self):
-        return f"<Venue(venue_id={self.venue_id}, venue_name='{self.venue_name}', venue_city='{self.venue_city}', venue_address='{self.venue_address}', surface_type='{self.surface_type}', google_maps_url='{self.google_maps_url}', photo_url='{self.photo_url}')>"
-
-class Match(Base):
-    __tablename__ = 'Match'
-
-    match_id = Column(Integer, primary_key=True, autoincrement=True)
-    date = Column(Date)
-    venue_id = Column(Integer, ForeignKey('Venue.venue_id'))
-    state = Column(String(20))
-    winner_id = Column(Integer, ForeignKey('Athlete.user_id'))
-    player1_id = Column(Integer, ForeignKey('Athlete.user_id'))
-    player2_id = Column(Integer, ForeignKey('Athlete.user_id'))
-
-    venue = relationship("Venue")
-    winner = relationship("Athlete", foreign_keys=[winner_id])
-    player1 = relationship("Athlete", foreign_keys=[player1_id])
-    player2 = relationship("Athlete", foreign_keys=[player2_id])
     
-    __table_args__ = (
-    CheckConstraint("state IN ('Upcoming', 'Completed')"),
-    )
-    def __repr__(self):
-        return f"<Match(match_id={self.match_id}, date={self.date}, venue_id={self.venue_id}, state='{self.state}', winner_id={self.winner_id}, player1_id={self.player1_id}, player2_id={self.player2_id})>"
     
-
-class MatchScore(Base):
-    __tablename__ = 'Match_score'
-
-    match_id = Column(Integer, ForeignKey('Match.match_id'), primary_key=True)
-    athlete_user_id = Column(Integer, ForeignKey('Athlete.user_id'), primary_key=True)
-    set_number = Column(Integer, primary_key=True)
-    games_won = Column(Integer)
-
-    match = relationship("Match")
-    athlete = relationship("Athlete")
-
-    __table_args__ = (
-        PrimaryKeyConstraint('match_id', 'set_number', 'athlete_user_id'),
-    )
     
-    def __repr__(self):
-        return f"<MatchScore(match_id={self.match_id}, athlete_user_id={self.athlete_user_id}, set_number={self.set_number}, games_won={self.games_won})>"
-    
-class MatchInvitation(Base):
-    __tablename__ = 'Match_invitation'
+class MatchInvitationCreate(BaseModel):
+    invitation_id: Optional[int]
+    sender_id: Optional[int]
+    recipient_id: Optional[int]
+    status: Optional[str] = Field(None, max_length=20)
+    invitation_date: Optional[datetime]
+    scheduled_date: Optional[date]
+    scheduled_time: Optional[time]
+    venue_id: Optional[int]
 
-    invitation_id = Column(Integer, primary_key=True, autoincrement=True)
-    sender_id = Column(Integer, ForeignKey('Athlete.user_id'))
-    recipient_id = Column(Integer, ForeignKey('Athlete.user_id'))
-    status = Column(String(20))
-    invitation_date = Column(TIMESTAMP)
-    scheduled_date = Column(Date)
-    scheduled_time = Column(Time)
-    venue_id = Column(Integer, ForeignKey('Venue.venue_id'))
-
-    sender = relationship("Athlete", foreign_keys=[sender_id])
-    recipient = relationship("Athlete", foreign_keys=[recipient_id])
-    venue = relationship("Venue")
-    
-    __table_args__ = (
-        CheckConstraint("status IN ('Pending', 'Accepted', 'Completed')"),
-    )
-    
-    def __repr__(self):
-        return f"<MatchInvitation(invitation_id={self.invitation_id}, sender_id={self.sender_id}, recipient_id={self.recipient_id}, status='{self.status}', invitation_date={self.invitation_date}, scheduled_date={self.scheduled_date}, scheduled_time={self.scheduled_time}, venue_id={self.venue_id})>"
+    class Config:
+        orm_mode = True
+        
+    @validator('status')
+    def validate_status(cls, value):
+        valid_statuses = ['Pending', 'Accepted', 'Completed']
+        if value is not None and value not in valid_statuses:
+            raise ValueError(f'Invalid status. Must be one of: {", ".join(valid_statuses)}')
+        return value
