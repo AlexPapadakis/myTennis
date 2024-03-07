@@ -6,7 +6,7 @@ from ..models import AthleteCreate
 
 router = APIRouter()
 
-@router.get("/athletes")
+@router.get("/athletes", response_model=list[AthleteCreate])
 def get_athletes(db: Session = Depends(get_db)):
     athletes = db.query(Athlete).all()
     if athletes is None:
@@ -14,14 +14,14 @@ def get_athletes(db: Session = Depends(get_db)):
     return athletes
 
 
-@router.get("/athletes/{user_id}")
+@router.get("/athletes/{user_id}", response_model=AthleteCreate)
 def get_athlete(user_id: int, db: Session = Depends(get_db)):
     athlete = db.query(Athlete).filter(Athlete.user_id == user_id).first()
     if not athlete:
         raise HTTPException(status_code=404, detail="Athlete not found")
     return athlete
 
-@router.post("/athletes")
+@router.post("/athletes", response_model=AthleteCreate)
 def create_athlete(athlete: AthleteCreate, db: Session = Depends(get_db)):
     new_athlete = Athlete(**athlete.model_dump())
     db.add(new_athlete)
@@ -29,7 +29,7 @@ def create_athlete(athlete: AthleteCreate, db: Session = Depends(get_db)):
     db.refresh(new_athlete)
     return athlete
 
-@router.put("/athletes/{user_id}")
+@router.put("/athletes/{user_id}", response_model=AthleteCreate)
 def update_athlete(user_id: int, athlete: AthleteCreate, db: Session = Depends(get_db)):
     existing_athlete = db.query(Athlete).filter(Athlete.user_id == user_id).first()
     if not existing_athlete:

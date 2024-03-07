@@ -1,0 +1,13 @@
+{
+  "username": "example_user",
+  "email": "user@example.com",
+  "password": "password123",
+  "real_name": "John Doe",
+  "gender": "Male",
+  "phone": "123-456-7890",
+  "birthday": "1990-01-01",
+  "address": "123 Street",
+  "city": "Example City",
+  "postal_code": "12345",
+  "photo_url": "http://example.com/photo.jpg"
+}

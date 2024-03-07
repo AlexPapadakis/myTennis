@@ -1,5 +1,6 @@
 import datetime
 from decimal import Decimal
+import json
 import time
 from pydantic import BaseModel, constr, EmailStr, Field, validator
 from datetime import date
@@ -126,3 +127,14 @@ class MatchInvitationCreate(BaseModel):
         if value is not None and value not in valid_statuses:
             raise ValueError(f'Invalid status. Must be one of: {", ".join(valid_statuses)}')
         return value
+    
+    
+class MatchScoreCreate(BaseModel):
+    match_id: Optional[int]
+    athlete_user_id: Optional[int]
+    set_number: Optional[int]
+    games_won: Optional[int]
+    
+    class Config:
+        orm_mode = True
+        

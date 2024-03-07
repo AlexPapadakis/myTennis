@@ -1,0 +1,8 @@
+{
+  "venue_name": "Example Venue",
+  "venue_city": "Example City",
+  "venue_address": "456 Street",
+  "surface_type": "Hard",
+  "google_maps_url": "http://maps.google.com/venue",
+  "photo_url": "http://example.com/venue_photo.jpg"
+}

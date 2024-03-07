@@ -6,6 +6,7 @@ from app.routes.venue import router as venue_router
 from app.routes.athlete import router as athlete_router
 from app.routes.match import router as match_router
 from app.routes.match_invitation import router as match_invitation_router
+from app.routes.match_score import router as match_score_router
 
 def initialize_app():
     schemas.Base.metadata.create_all(bind=engine)
@@ -19,6 +20,7 @@ def initialize_app():
     app.include_router(athlete_router)
     app.include_router(match_router)
     app.include_router(match_invitation_router)
+    app.include_router(match_score_router)
     print("Router included")
 
 
