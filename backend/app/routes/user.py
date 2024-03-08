@@ -4,15 +4,10 @@ from ..schemas import User
 from ..database import get_db
 from ..models import UserCreate
 
-
 router = APIRouter()
-        
-@router.get("/home/")
-def read_root():
-    return {"Hello": "World"}
 
 
-@router.get("/users/")
+@router.get("/users/", response_model=list[UserCreate])
 def read_user(db: Session = Depends(get_db)):
     print("Reading users...")
     users = db.query(User).all()
@@ -21,7 +16,7 @@ def read_user(db: Session = Depends(get_db)):
     return users
 
 
-@router.get("/users/{user_id}")
+@router.get("/users/{user_id}", response_model=UserCreate)
 def read_user(user_id: int, db: Session = Depends(get_db)):
     print("Reading user with id: ", user_id, "...")
     user = db.query(User).filter(User.id == user_id).first()
@@ -29,7 +24,7 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
-@router.post("/users/")
+@router.post("/users/", response_model=UserCreate)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
     print("Creating user...")
     db_user = User(**user.model_dump())
@@ -38,7 +33,7 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db.refresh(db_user)
     return {"user": db_user}
 
-@router.put("/users/{user_id}")
+@router.put("/users/{user_id}", response_model=UserCreate)
 def update_user(user_id: int, user: UserCreate, db: Session = Depends(get_db)):
     print("Updating user with id: ", user_id, "...")
     db_user = db.query(User).filter(User.id == user_id).first()

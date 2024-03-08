@@ -15,20 +15,20 @@ router = APIRouter()
 router = APIRouter()
 
 
-@router.get("/matchInvitations")
+@router.get("/matchInvitations", response_model=list[MatchInvitationCreate])
 def get_all_match_invitations(db: Session = Depends(get_db)):
     match_invitations = db.query(MatchInvitation).all()
     return match_invitations
 
 
-@router.get("/matchInvitations/{match_invitation_id}")
+@router.get("/matchInvitations/{match_invitation_id}", response_model=MatchInvitationCreate)
 def get_match_invitation(match_invitation_id: int, db: Session = Depends(get_db)):
     db_match_invitation = db.query(MatchInvitation).filter(MatchInvitation.invitation_id == match_invitation_id).first()
     if not db_match_invitation:
         raise HTTPException(status_code=404, detail="Match invitation not found")
     return db_match_invitation
 
-@router.post("/matchInvitations")
+@router.post("/matchInvitations", response_model=MatchInvitationCreate)
 def create_match_invitation(match_invitation: MatchInvitationCreate, db: Session = Depends(get_db)):
     db_match_invitation = MatchInvitation(**match_invitation.model_dump())
     db.add(db_match_invitation)
@@ -37,7 +37,7 @@ def create_match_invitation(match_invitation: MatchInvitationCreate, db: Session
     return db_match_invitation
 
 
-@router.put("/matchInvitations/{match_invitation_id}")
+@router.put("/matchInvitations/{match_invitation_id}", response_model=MatchInvitationCreate)
 def update_match_invitation(match_invitation_id: int, match_invitation: MatchInvitationCreate, db: Session = Depends(get_db)):
     db_match_invitation = db.query(MatchInvitation).filter(MatchInvitation.invitation_id == match_invitation_id).first()
     if not db_match_invitation:
