@@ -7,6 +7,7 @@ from app.routes.athlete import router as athlete_router
 from app.routes.match import router as match_router
 from app.routes.match_invitation import router as match_invitation_router
 from app.routes.match_score import router as match_score_router
+from app.routes.auth import router as auth_router
 
 def initialize_app():
     schemas.Base.metadata.create_all(bind=engine)
@@ -15,13 +16,14 @@ def initialize_app():
     app = FastAPI()
     print("App created")
     
+    app.include_router(auth_router)
     app.include_router(user_router)
     app.include_router(venue_router)
     app.include_router(athlete_router)
     app.include_router(match_router)
     app.include_router(match_invitation_router)
     app.include_router(match_score_router)
-    print("Router included")
+    print("Routers included")
 
 
     return app

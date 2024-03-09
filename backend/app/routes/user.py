@@ -4,11 +4,14 @@ from ..schemas import User
 from ..database import get_db
 from ..models import UserCreate
 
+from .auth import verify_token
+
 router = APIRouter()
 
 
 @router.get("/users/", response_model=list[UserCreate])
-def read_user(db: Session = Depends(get_db)):
+def read_user(db: Session = Depends(get_db), _: str = Depends(verify_token)):
+    
     print("Reading users...")
     users = db.query(User).all()
     if users is None:

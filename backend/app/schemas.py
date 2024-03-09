@@ -23,7 +23,7 @@ class User(Base):
     created_at = Column(TIMESTAMP, server_default=func.now())
     
     def __repr__(self):
-        return f"<User(id={self.id}, username='{self.username}'>"
+        return f"<User(id={self.id}, username='{self.username}')>"
     
 
 class Athlete(Base):
