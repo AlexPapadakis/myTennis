@@ -4,7 +4,7 @@ from fastapi import Depends, HTTPException, status, APIRouter
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from datetime import datetime, timedelta
 
-from ..schemas import User
+from ..schemas import User,UserRoles,Roles
 from ..models import UserCreate
 from sqlalchemy.orm import Session
 from ..database import get_db
@@ -34,7 +34,12 @@ def authenticate_user(username: str, password: str, db: Session):
         return False
     return user
 
-
+def get_user_roles(user: User, db: Session):
+    roles = db.query(Roles).join(UserRoles).filter(UserRoles.user_id == user.id).all()
+    roles_names = [role.name for role in roles]
+    return roles_names
+    
+    
 def verify_password(user_password:str ,password: str):
     if pwd_context.verify(password, user_password):
         print("Password verified")
@@ -47,7 +52,6 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
     
     print("Logging in...")
     user = authenticate_user(form_data.username, form_data.password, db)
-    print(user)
     
     if not user:
         raise HTTPException(
@@ -55,10 +59,11 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-        
+    
+    user_roles = get_user_roles(user, db)     
     access_token_expires = timedelta(minutes=30)
     access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
+        data={"sub": user.username,"roles":user_roles}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -76,9 +81,11 @@ def verify_token(token: str = Depends(oauth2_scheme)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
+        roles: list = payload.get("roles")
+        print(roles)
         if username is None:
             raise HTTPException(status_code=401, detail="Invalid token")
-        return username
+        return username,roles
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
     

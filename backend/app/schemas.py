@@ -125,3 +125,32 @@ class MatchInvitation(Base):
     
     def __repr__(self):
         return f"<MatchInvitation(invitation_id={self.invitation_id}, sender_id={self.sender_id}, recipient_id={self.recipient_id}, status='{self.status}', invitation_date={self.invitation_date}, scheduled_date={self.scheduled_date}, scheduled_time={self.scheduled_time}, venue_id={self.venue_id})>"
+    
+    
+    
+class Roles(Base):
+    __tablename__ = 'Roles'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(20), unique=True)
+    description = Column(String(255))
+    
+    def __repr__(self):
+        return f"<Roles(id={self.id}, name='{self.name}', description='{self.description}')>"
+    
+    
+class UserRoles(Base):
+    __tablename__ = 'User_Roles'
+
+    user_id = Column(Integer, ForeignKey('User.id'), primary_key=True)
+    role_id = Column(Integer, ForeignKey('Roles.id'), primary_key=True)
+    
+    user = relationship("User")
+    role = relationship("Roles")
+    
+    __table_args__ = (
+        PrimaryKeyConstraint('user_id', 'role_id'),
+    )
+    
+    def __repr__(self):
+        return f"<UserRoles(user_id={self.user_id}, role_id={self.role_id})>"

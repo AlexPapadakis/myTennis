@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from ..schemas import User
+from ..schemas import User,Roles
 from ..database import get_db
 from ..models import UserCreate
 
@@ -14,13 +14,17 @@ router = APIRouter()
 
 
 @router.get("/users/", response_model=list[UserCreate])
-def read_user(db: Session = Depends(get_db), _: str = Depends(verify_token)):
+def read_user(db: Session = Depends(get_db), token_data: tuple = Depends(verify_token)):
+    username, roles = token_data
+    if "admin" in roles:
+        print("Reading users...")
+        users = db.query(User).all()
+        if users is None:
+            raise HTTPException(status_code=404, detail="Users not found")
+        return users
+    else:
+        raise HTTPException(status_code=401, detail="Unauthorized access")
     
-    print("Reading users...")
-    users = db.query(User).all()
-    if users is None:
-        raise HTTPException(status_code=404, detail="Users not found")
-    return users
 
 
 @router.get("/users/{user_id}", response_model=UserCreate)
@@ -29,6 +33,7 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
+    
     return user
 
 @router.post("/users/", response_model=UserCreate)
