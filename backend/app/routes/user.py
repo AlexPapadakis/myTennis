@@ -6,6 +6,10 @@ from ..models import UserCreate
 
 from .auth import verify_token
 
+from passlib.context import CryptContext
+
+pwd_context = CryptContext(schemes=["bcrypt"])
+
 router = APIRouter()
 
 
@@ -30,11 +34,13 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
 @router.post("/users/", response_model=UserCreate)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
     print("Creating user...")
-    db_user = User(**user.model_dump())
+    # Hash the password
+    hashed_password = pwd_context.hash(user.password)
+    db_user = User(**user.model_dump(exclude={"password"}) , password=hashed_password) 
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
-    return {"user": db_user}
+    return db_user
 
 @router.put("/users/{user_id}", response_model=UserCreate)
 def update_user(user_id: int, user: UserCreate, db: Session = Depends(get_db)):

@@ -12,12 +12,17 @@ from ..database import get_db
 from dotenv import load_dotenv
 import os
 
+from passlib.context import CryptContext
+
+pwd_context = CryptContext(schemes=["bcrypt"])
+
 load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY')
 ALGORITHM = os.getenv('ALGORITHM')
 
 router = APIRouter()
 
+ 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
@@ -29,14 +34,18 @@ def authenticate_user(username: str, password: str, db: Session):
         return False
     return user
 
-#will be implemented later, hash,salt and compare password
+
 def verify_password(user_password:str ,password: str):
-    return user_password == password
+    if pwd_context.verify(password, user_password):
+        print("Password verified")
+        return True
+    print("Password not verified")
+    return False
 
 @router.post("/token")
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    print("Logging in...")
     
+    print("Logging in...")
     user = authenticate_user(form_data.username, form_data.password, db)
     print(user)
     
@@ -72,3 +81,5 @@ def verify_token(token: str = Depends(oauth2_scheme)):
         return username
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
+    
+

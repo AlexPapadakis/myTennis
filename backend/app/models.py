@@ -10,6 +10,7 @@ from datetime import time,datetime
 
 
 class UserCreate(BaseModel):
+    # id: Optional[int]
     username: str = Field(..., max_length=50)
     email: EmailStr
     password: str = Field(..., max_length=255)
@@ -21,6 +22,7 @@ class UserCreate(BaseModel):
     city: Optional[str] = Field(None, max_length=100)
     postal_code: Optional[str] = Field(None, max_length=20)
     photo_url: Optional[str] = Field(None, max_length=255)
+    # created_at: Optional[datetime]
     
     class Config:
         orm_mode = True
