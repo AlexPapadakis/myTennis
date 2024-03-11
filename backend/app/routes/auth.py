@@ -82,7 +82,6 @@ def verify_token(token: str = Depends(oauth2_scheme)):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         roles: list = payload.get("roles")
-        print(roles)
         if username is None:
             raise HTTPException(status_code=401, detail="Invalid token")
         return username,roles

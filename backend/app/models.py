@@ -1,38 +1,63 @@
 import datetime
 from decimal import Decimal
-import json
 import time
 from pydantic import BaseModel, constr, EmailStr, Field, validator
 from datetime import date
 from typing import Optional
-from pydantic import condecimal
+from pydantic import condecimal,root_validator
 from datetime import time,datetime
+from passlib.context import CryptContext
+from abc import ABC
+
+_pwd_context = CryptContext(schemes=["bcrypt"])
 
 
-class UserCreate(BaseModel):
-    # id: Optional[int]
-    username: str = Field(..., max_length=50)
-    email: EmailStr
-    password: str = Field(..., max_length=255)
+class UserBase(BaseModel,ABC):
+    id: Optional[int] = Field(None, gt=0)
+    password: Optional[str] = Field(None, max_length=255)
+    username: Optional[str] = Field(None, max_length=50)
+    email: Optional[EmailStr] = Field(None, max_length=100)
     real_name: Optional[str] = Field(None, max_length=50)
-    gender: Optional[str] 
+    gender: Optional[str] = Field(None)
     phone: Optional[str] = Field(None, max_length=20)
-    birthday: Optional[date]
+    birthday: Optional[date] = Field(None)
     address: Optional[str] = Field(None, max_length=255)
     city: Optional[str] = Field(None, max_length=100)
     postal_code: Optional[str] = Field(None, max_length=20)
     photo_url: Optional[str] = Field(None, max_length=255)
-    # created_at: Optional[datetime]
-    
+    created_at: Optional[datetime] = Field(None)
+
     class Config:
         orm_mode = True
-    
+        
+
+
+class UserWithValidatorsBase(UserBase, ABC):
+
+    @root_validator(pre=True)
+    def hash_password(cls, values):
+        password = values.get('password')
+        if password:
+            values['password'] = _pwd_context.hash(password)
+        return values
+
     @validator('gender')
     def validate_gender(cls, value):
+        print(f"Validating gender: {value}")
         valid_genders = ['Male', 'Female', 'Other']
         if value is not None and value not in valid_genders:
             raise ValueError(f'Invalid gender. Must be one of: {", ".join(valid_genders)}')
         return value
+
+class UserCreate(UserWithValidatorsBase):
+    username: str = Field(..., max_length=50)
+    email: EmailStr
+    password: str = Field(..., max_length=255)
+
+class UserUpdate(UserWithValidatorsBase):
+    pass
+class UserResponse(UserBase):     
+    pass
     
     
 class AthleteCreate(BaseModel):

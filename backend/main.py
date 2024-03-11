@@ -15,7 +15,7 @@ def initialize_app():
 
     app = FastAPI()
     print("App created")
-    
+        
     app.include_router(auth_router)
     app.include_router(user_router)
     app.include_router(venue_router)
