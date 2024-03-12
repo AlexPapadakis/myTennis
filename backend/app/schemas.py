@@ -66,7 +66,7 @@ class Match(Base):
     __tablename__ = 'Match'
 
     match_id = Column(Integer, primary_key=True, autoincrement=True)
-    date = Column(Date)
+    match_date = Column(Date)
     venue_id = Column(Integer, ForeignKey('Venue.venue_id'))
     state = Column(String(20))
     winner_id = Column(Integer, ForeignKey('Athlete.user_id'))

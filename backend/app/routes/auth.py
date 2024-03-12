@@ -89,3 +89,12 @@ def verify_token(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=401, detail="Invalid token")
     
 
+def get_roles(token_data: tuple = Depends(verify_token)):
+    username, roles = token_data
+    return roles
+
+def admin_only(roles: list = Depends(get_roles)):
+    if "admin" in roles:
+        print("Admin access granted")
+    else:
+        raise HTTPException(status_code=401, detail="Unauthorized access")

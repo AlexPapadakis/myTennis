@@ -11,9 +11,11 @@ from abc import ABC
 
 _pwd_context = CryptContext(schemes=["bcrypt"])
 
+MAX_SETS_PER_MATCH = 5
+MAX_GAMES_PER_SET = 7
 
 class UserBase(BaseModel,ABC):
-    id: Optional[int] = Field(None, gt=0)
+    id: Optional[int] = Field(None, gt=0, read_only=True)
     password: Optional[str] = Field(None, max_length=255)
     username: Optional[str] = Field(None, max_length=50)
     email: Optional[EmailStr] = Field(None, max_length=100)
@@ -25,13 +27,11 @@ class UserBase(BaseModel,ABC):
     city: Optional[str] = Field(None, max_length=100)
     postal_code: Optional[str] = Field(None, max_length=20)
     photo_url: Optional[str] = Field(None, max_length=255)
-    created_at: Optional[datetime] = Field(None)
+    created_at: Optional[datetime] = Field(None, read_only=True)
 
     class Config:
         orm_mode = True
         
-
-
 class UserWithValidatorsBase(UserBase, ABC):
 
     @root_validator(pre=True)
@@ -60,18 +60,19 @@ class UserResponse(UserBase):
     pass
     
     
-class AthleteCreate(BaseModel):
-    user_id: int
+class AthleteBase(BaseModel,ABC):
+    user_id: Optional[int] = Field(None, gt=0, read_only=True)
     handedness: Optional[str] = Field(None, max_length=20)
     height: Optional[Decimal] = Field(None, gt=0, le=999.99)
     weight: Optional[Decimal] = Field(None, gt=0, le=999.99)
     backhand_type: Optional[str] = Field(None, max_length=20)
     skill_level: Optional[str] = Field(None, max_length=20)
-    points: Optional[int]
+    points: Optional[int] = Field(None, ge=0)
     
     class Config:
         orm_mode = True
         
+class AthleteWithValidators(AthleteBase,ABC):
     @validator('handedness')
     def validate_handedness(cls, value):
         valid_handedness = ['Right-handed', 'Left-handed']
@@ -93,38 +94,77 @@ class AthleteCreate(BaseModel):
             raise ValueError(f'Invalid skill level. Must be one of: {", ".join(valid_skill_levels)}')
         return value
     
+class AthleteCreate(AthleteWithValidators):
+    handedness: str = Field(..., max_length=20)
+    height: Decimal = Field(..., gt=0, le=999.99)
+    weight: Decimal = Field(..., gt=0, le=999.99)
+    backhand_type: str = Field(..., max_length=20)
+    skill_level: str = Field(..., max_length=20)
+class AthleteUpdate(AthleteWithValidators):
+    pass
+class AthleteResponse(AthleteBase):
+    pass
     
     
-class VenueCreate(BaseModel):
-    venue_name: str = Field(..., max_length=100)
-    venue_city: str = Field(..., max_length=100)
-    venue_address: str = Field(..., max_length=100)
-    surface_type: str = Field(..., max_length=10)
+    
+    
+    
+class VenueBase(BaseModel,ABC):
+    venue_id: Optional[int] = Field(None, gt=0, read_only=True)
+    venue_name: Optional[str] = Field(None, max_length=100)
+    venue_city: Optional[str] = Field(None, max_length=100)
+    venue_address: Optional[str] = Field(None, max_length=100)
+    surface_type: Optional[str] = Field(None, max_length=10)
     google_maps_url: Optional[str] = Field(None, max_length=255)
     photo_url: Optional[str] = Field(None, max_length=255)
     
     class Config:
         orm_mode = True
-        
+class VenueWithValidators(VenueBase,ABC):
     @validator('surface_type')
     def validate_surface_type(cls, value):
         valid_surface_types = ['Hard', 'Grass', 'Clay']
         if value not in valid_surface_types:
             raise ValueError(f'Invalid surface type. Must be one of: {", ".join(valid_surface_types)}')
         return value
-    
+class VenueCreate(VenueWithValidators):
+    venue_city: str = Field(..., max_length=100)
+    venue_address: str = Field(..., max_length=100)
+    surface_type: str = Field(..., max_length=10)
 
-class MatchCreate(BaseModel):
-    date: Optional[date]
-    venue_id: Optional[int]
+class VenueUpdate(VenueWithValidators):
+    pass
+
+class VenueResponse(VenueBase):
+    pass
+
+
+
+class MatchBase(BaseModel,ABC):
+    match_id: Optional[int] = Field(None, gt=0,read_only=True)
+    match_date: Optional[date] = Field(None)
+    venue_id: Optional[int] = Field(None, gt=0)
     state: Optional[str] = Field(None, max_length=20)
-    winner_id: Optional[int]
-    player1_id: Optional[int]
-    player2_id: Optional[int]
-    
+    winner_id: Optional[int] = Field(None, gt=0)
+    player1_id: Optional[int] = Field(None, gt=0)
+    player2_id: Optional[int] = Field(None, gt=0)
+
     class Config:
         orm_mode = True
         
+class MatchWithValidators(MatchBase,ABC):
+    @validator('match_date')
+    def validate_date(cls, value):
+        if value is not None and value < date.today():
+            raise ValueError('Match date must be in the future')
+        return value
+   
+class MatchCreate(MatchWithValidators):
+    @validator('state')
+    def validate_state(cls, v):
+        return "Upcoming"
+    
+class MatchUpdate(MatchWithValidators):
     @validator('state')
     def validate_state(cls, value):
         valid_states = ['Upcoming', 'Completed']
@@ -132,22 +172,25 @@ class MatchCreate(BaseModel):
             raise ValueError(f'Invalid state. Must be one of: {", ".join(valid_states)}')
         return value
     
-    
-    
-    
-class MatchInvitationCreate(BaseModel):
-    invitation_id: Optional[int]
-    sender_id: Optional[int]
-    recipient_id: Optional[int]
+class MatchResponse(MatchBase):
+    pass
+
+
+
+class MatchInvitationBase(BaseModel,ABC):
+    invitation_id: Optional[int] = Field(None, gt=0, read_only=True)
+    sender_id: Optional[int] = Field(None, gt=0)
+    recipient_id: Optional[int] = Field(None, gt=0)
     status: Optional[str] = Field(None, max_length=20)
-    invitation_date: Optional[datetime]
-    scheduled_date: Optional[date]
-    scheduled_time: Optional[time]
-    venue_id: Optional[int]
+    invitation_date: Optional[datetime] = Field(None, read_only=True)
+    scheduled_date: Optional[date] = Field(None)
+    scheduled_time: Optional[time] = Field(None) 
+    venue_id: Optional[int] = Field(None, gt=0)
 
     class Config:
         orm_mode = True
         
+class MatchInvitationWithValidators(MatchInvitationBase,ABC):
     @validator('status')
     def validate_status(cls, value):
         valid_statuses = ['Pending', 'Accepted', 'Completed']
@@ -155,13 +198,61 @@ class MatchInvitationCreate(BaseModel):
             raise ValueError(f'Invalid status. Must be one of: {", ".join(valid_statuses)}')
         return value
     
+class MatchInvitationCreate(MatchInvitationWithValidators):
+    status: str = 'Pending'
+    invitation_date: datetime = datetime.now()
     
-class MatchScoreCreate(BaseModel):
-    match_id: Optional[int]
-    athlete_user_id: Optional[int]
-    set_number: Optional[int]
-    games_won: Optional[int]
+    @validator('invitation_date', pre=True, always=True)
+    def default_invitation_date(cls, v):
+        return datetime.now()
+    @validator('status', pre=True, always=True)
+    def default_status(cls, v):
+        return 'Pending'
     
+class MatchInvitationUpdate(MatchInvitationWithValidators):
+    @validator('status')
+    def validate_status(cls, value):
+        valid_statuses = ['Pending', 'Accepted', 'Completed']
+        if value is not None and value not in valid_statuses:
+            raise ValueError(f'Invalid status. Must be one of: {", ".join(valid_statuses)}')
+        return value
+
+
+class MatchInvitationResponse(MatchInvitationBase):
+    pass
+    
+    
+    
+    
+    
+    
+    
+    
+    
+class MatchScoreBase(BaseModel,ABC):
+    match_id: Optional[int] = Field(None, gt=0)
+    athlete_user_id: Optional[int] = Field(None, gt=0)
+    set_number: Optional[int] = Field(None, gt=1)
+    games_won: Optional[int] = Field(None, ge=0)
     class Config:
         orm_mode = True
+        
+class MatchScoreWithValidators(MatchScoreBase,ABC):
+    @validator('set_number')
+    def validate_set_number(cls, value):
+        if value is not None and value > MAX_SETS_PER_MATCH:
+            raise ValueError('Set number must not be greater than {MAX_SETS_PER_MATCH}')
+        return value
+    @validator('games_won')
+    def validate_games_won(cls, value):
+        if value is not None and value > MAX_GAMES_PER_SET:
+            raise ValueError('Games won must be less or equal than {MAX_GAMES_PER_SET}')
+        return value
+
+class MatchScoreCreate(MatchScoreWithValidators):
+    pass
+class MatchScoreUpdate(MatchScoreWithValidators):
+    pass
+class MatchScoreResponse(MatchScoreBase):
+    pass
         

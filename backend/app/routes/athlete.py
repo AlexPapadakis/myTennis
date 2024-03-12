@@ -1,51 +1,58 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from ..database import get_db
 from ..schemas import Athlete
-from ..models import AthleteCreate
+from ..database import get_db
+from ..models import AthleteCreate,AthleteResponse,AthleteUpdate
+from .auth import verify_token, admin_only, get_roles
+from .error_handler import execute_query_and_handle_errors
 
 router = APIRouter()
 
-@router.get("/athletes", response_model=list[AthleteCreate])
-def get_athletes(db: Session = Depends(get_db)):
-    athletes = db.query(Athlete).all()
-    if athletes is None:
-        raise HTTPException(status_code=404, detail="Athletes not found")
+
+@router.get("/athletes/", response_model=list[AthleteResponse], dependencies=[Depends(admin_only)])
+def read_athletes(db: Session = Depends(get_db)):
+    athletes = execute_query_and_handle_errors(lambda: db.query(Athlete).all(), "Athletes")
     return athletes
 
 
-@router.get("/athletes/{user_id}", response_model=AthleteCreate)
-def get_athlete(user_id: int, db: Session = Depends(get_db)):
-    athlete = db.query(Athlete).filter(Athlete.user_id == user_id).first()
-    if not athlete:
-        raise HTTPException(status_code=404, detail="Athlete not found")
+@router.get("/athletes/{user_id}", response_model=AthleteResponse)
+def read_athlete_by_id(user_id: int, db: Session = Depends(get_db)):
+    print("Reading athlete with id: ", user_id, "...")
+    athlete = execute_query_and_handle_errors(lambda: db.query(Athlete).filter(Athlete.user_id == user_id).first(), "Athlete")
     return athlete
 
-@router.post("/athletes", response_model=AthleteCreate)
+
+@router.post("/athletes/", response_model=AthleteResponse)
 def create_athlete(athlete: AthleteCreate, db: Session = Depends(get_db)):
-    new_athlete = Athlete(**athlete.model_dump())
-    db.add(new_athlete)
+    print("Creating athlete...")
+    db_athlete = Athlete(**athlete.model_dump())
+    db.add(db_athlete)
     db.commit()
-    db.refresh(new_athlete)
-    return athlete
+    db.refresh(db_athlete)
+    return db_athlete
 
-@router.put("/athletes/{user_id}", response_model=AthleteCreate)
-def update_athlete(user_id: int, athlete: AthleteCreate, db: Session = Depends(get_db)):
-    existing_athlete = db.query(Athlete).filter(Athlete.user_id == user_id).first()
-    if not existing_athlete:
-        raise HTTPException(status_code=404, detail="Athlete not found")
-    
+
+@router.put("/athletes/{user_id}", response_model=AthleteResponse)
+def update_athlete(user_id: int, athlete: AthleteUpdate, db: Session = Depends(get_db)):
+    print("Updating athlete with id: ", user_id, "...")
+
+    db_athlete = execute_query_and_handle_errors(lambda: db.query(Athlete).filter(Athlete.user_id == user_id).first(), "Athlete")
+
     for attr, value in athlete.model_dump().items():
-        setattr(existing_athlete, attr, value)
+        if attr is not None and value is not None:
+            setattr(db_athlete, attr, value)
     db.commit()
-    db.refresh(existing_athlete)
-    return existing_athlete
+    db.refresh(db_athlete)
+
+    print("Athlete updated successfully.")
+
+    return db_athlete
+
 
 @router.delete("/athletes/{user_id}")
 def delete_athlete(user_id: int, db: Session = Depends(get_db)):
-    athlete = db.query(Athlete).filter(Athlete.user_id == user_id).first()
-    if not athlete:
-        raise HTTPException(status_code=404, detail="Athlete not found")
+    print("Deleting athlete with id: ", user_id, "...")
+    athlete = execute_query_and_handle_errors(lambda: db.query(Athlete).filter(Athlete.user_id == user_id).first(), "Athlete")
     db.delete(athlete)
     db.commit()
     return {"message": "Athlete deleted"}

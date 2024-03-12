@@ -4,7 +4,7 @@ from ..schemas import User
 from ..database import get_db
 from ..models import UserCreate,UserResponse,UserUpdate
 
-from .auth import verify_token
+from .auth import verify_token,admin_only,get_roles
 
 
 from .error_handler import execute_query_and_handle_errors
@@ -14,15 +14,6 @@ from .error_handler import execute_query_and_handle_errors
 router = APIRouter()
 
 
-def get_roles(token_data: tuple = Depends(verify_token)):
-    username, roles = token_data
-    return roles
-
-def admin_only(roles: list = Depends(get_roles)):
-    if "admin" in roles:
-        print("Admin access granted")
-    else:
-        raise HTTPException(status_code=401, detail="Unauthorized access")
 
 @router.get("/users/", response_model=list[UserResponse],dependencies =[Depends(admin_only)])
 def read_users(db: Session = Depends(get_db)): 
@@ -68,4 +59,4 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     db_user = execute_query_and_handle_errors(lambda: db.query(User).filter(User.id == user_id).first(), "User")
     db.delete(db_user)
     db.commit()
-    return db_user
+    return {"message": "User deleted"}
