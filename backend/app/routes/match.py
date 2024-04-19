@@ -30,6 +30,8 @@ def create_match(match: MatchCreate, db: Session = Depends(get_db)):
     return db_match
 
 
+
+
 @router.put("/matches/{match_id}", response_model=MatchResponse)
 def update_match(match_id: int, match: MatchUpdate, db: Session = Depends(get_db)):
     db_match = execute_query_and_handle_errors(lambda: db.query(Match).filter(Match.match_id == match_id).first(), "Match")

@@ -67,13 +67,16 @@ class Match(Base):
 
     match_id = Column(Integer, primary_key=True, autoincrement=True)
     match_date = Column(Date)
-    venue_id = Column(Integer, ForeignKey('Venue.venue_id'))
     state = Column(String(20))
+    tournament_id = Column(Integer, ForeignKey('Tournament.tournament_id'))
+    round = Column(String(20))
+    venue_id = Column(Integer, ForeignKey('Venue.venue_id'))
     winner_id = Column(Integer, ForeignKey('Athlete.user_id'))
     player1_id = Column(Integer, ForeignKey('Athlete.user_id'))
     player2_id = Column(Integer, ForeignKey('Athlete.user_id'))
 
     venue = relationship("Venue")
+    tournament_id = relationship("Tournament")
     winner = relationship("Athlete", foreign_keys=[winner_id])
     player1 = relationship("Athlete", foreign_keys=[player1_id])
     player2 = relationship("Athlete", foreign_keys=[player2_id])
@@ -82,8 +85,28 @@ class Match(Base):
     CheckConstraint("state IN ('Upcoming', 'Completed')"),
     )
     def __repr__(self):
-        return f"<Match(match_id={self.match_id}, date={self.date}, venue_id={self.venue_id}, state='{self.state}', winner_id={self.winner_id}, player1_id={self.player1_id}, player2_id={self.player2_id})>"
+        return f"<Match(match_id={self.match_id}, match_date={self.match_date}, venue_id={self.venue_id}, state='{self.state}', winner_id={self.winner_id}, player1_id={self.player1_id}, player2_id={self.player2_id})>"
+
+
     
+class Tournament(Base):
+    __tablename__ = 'Tournament'
+
+    tournament_id = Column(Integer, primary_key=True, autoincrement=True)
+    tournament_name = Column(String(100))
+    start_date = Column(Date) 
+    end_date = Column(Date)
+    venue_id = Column(Integer, ForeignKey('Venue.venue_id'))
+    state = Column(String(20))
+    
+    venue = relationship("Venue")
+
+    __table_args__ = (
+    CheckConstraint("state IN ('Upcoming','In Progress','Completed')"),
+    )
+    def __repr__(self):
+        return f"<Tournament(tournament_id={self.tournament_id}, tournament_name='{self.tournament_name}', start_date={self.start_date}, end_date={self.end_date}, venue_id={self.venue_id}, state='{self.state}')>"
+
 
 class MatchScore(Base):
     __tablename__ = 'Match_Score'
@@ -102,6 +125,8 @@ class MatchScore(Base):
     
     def __repr__(self):
         return f"<MatchScore(match_id={self.match_id}, athlete_user_id={self.athlete_user_id}, set_number={self.set_number}, games_won={self.games_won})>"
+    
+    
     
 class MatchInvitation(Base):
     __tablename__ = 'Match_Invitation'

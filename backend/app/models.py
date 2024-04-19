@@ -160,6 +160,9 @@ class MatchWithValidators(MatchBase,ABC):
         return value
    
 class MatchCreate(MatchWithValidators):
+    tournament_id: int = Field(..., gt=0)
+    round: str = Field(..., max_length=20)
+    
     @validator('state')
     def validate_state(cls, v):
         return "Upcoming"
