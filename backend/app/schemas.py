@@ -76,7 +76,8 @@ class Match(Base):
     player2_id = Column(Integer, ForeignKey('Athlete.user_id'))
 
     venue = relationship("Venue")
-    tournament_id = relationship("Tournament")
+    tournament = relationship("Tournament")
+    
     winner = relationship("Athlete", foreign_keys=[winner_id])
     player1 = relationship("Athlete", foreign_keys=[player1_id])
     player2 = relationship("Athlete", foreign_keys=[player2_id])

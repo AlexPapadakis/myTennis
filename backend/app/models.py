@@ -148,7 +148,8 @@ class MatchBase(BaseModel,ABC):
     winner_id: Optional[int] = Field(None, gt=0)
     player1_id: Optional[int] = Field(None, gt=0)
     player2_id: Optional[int] = Field(None, gt=0)
-
+    tournament_id: Optional[int] = Field(None, gt=0)
+    round: Optional[str] = Field(None, max_length=20)
     class Config:
         orm_mode = True
         
@@ -158,11 +159,17 @@ class MatchWithValidators(MatchBase,ABC):
         if value is not None and value < date.today():
             raise ValueError('Match date must be in the future')
         return value
-   
-class MatchCreate(MatchWithValidators):
-    tournament_id: int = Field(..., gt=0)
-    round: str = Field(..., max_length=20)
+
+    @root_validator(pre=True)
+    def validate_opponents(cls, values):
+        if values['player1_id'] == values['player2_id']:
+            raise ValueError('Player1 and Player2 must be different')
+        return values
     
+    
+class MatchCreate(MatchWithValidators):
+    state: str = 'Upcoming'
+
     @validator('state')
     def validate_state(cls, v):
         return "Upcoming"
@@ -177,6 +184,53 @@ class MatchUpdate(MatchWithValidators):
     
 class MatchResponse(MatchBase):
     pass
+
+
+class TournamentBase(BaseModel,ABC):
+    tournament_id: Optional[int] = Field(None, gt=0, read_only=True)
+    tournament_name: Optional[str] = Field(None, max_length=100)
+    start_date: Optional[date] = Field(None)
+    end_date: Optional[date] = Field(None)
+    venue_id: Optional[int] = Field(None, gt=0)
+    state: Optional[str] = Field(None, max_length=20)
+    
+    class Config:
+        orm_mode = True
+
+
+class TournamentWithValidators(TournamentBase,ABC):
+    @validator('start_date')
+    def validate_start_date(cls, value):
+        if value is not None and value < date.today():
+            raise ValueError('Start date must be in the future')
+        return value
+    
+    @validator('end_date')
+    def validate_end_date(cls, value, values):
+        if value is not None and value < values['start_date']:
+            raise ValueError('End date must be after start date')
+        return value
+
+class TournamentCreate(TournamentWithValidators):
+    state: str = 'Upcoming' 
+    @validator('state')
+    def validate_state(cls, v):
+        return "Upcoming"
+
+
+class TournamentUpdate(TournamentWithValidators):
+    @validator('state')
+    def validate_state(cls, value):
+        valid_states = ['Upcoming', 'In Progress', 'Completed']
+        if value is not None and value not in valid_states:
+            raise ValueError(f'Invalid state. Must be one of: {", ".join(valid_states)}')
+        return value
+
+class TournamentResponse(TournamentBase):
+    pass
+
+
+
 
 
 
@@ -213,12 +267,7 @@ class MatchInvitationCreate(MatchInvitationWithValidators):
         return 'Pending'
     
 class MatchInvitationUpdate(MatchInvitationWithValidators):
-    @validator('status')
-    def validate_status(cls, value):
-        valid_statuses = ['Pending', 'Accepted', 'Completed']
-        if value is not None and value not in valid_statuses:
-            raise ValueError(f'Invalid status. Must be one of: {", ".join(valid_statuses)}')
-        return value
+    pass
 
 
 class MatchInvitationResponse(MatchInvitationBase):

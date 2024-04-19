@@ -10,13 +10,13 @@ router = APIRouter()
 
 
 @router.get("/matches", response_model=list[MatchResponse])
-def get_all_matches(db: Session = Depends(get_db)):
+def read_matches(db: Session = Depends(get_db)):
     matches = execute_query_and_handle_errors(lambda: db.query(Match).all(), "Matches")
     return matches
 
 
 @router.get("/matches/{match_id}", response_model=MatchResponse)
-def get_match(match_id: int, db: Session = Depends(get_db)):
+def read_match_by_id(match_id: int, db: Session = Depends(get_db)):
     match = execute_query_and_handle_errors(lambda: db.query(Match).filter(Match.match_id == match_id).first(), "Match")
     return match
 
