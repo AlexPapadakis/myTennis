@@ -14,6 +14,9 @@ _pwd_context = CryptContext(schemes=["bcrypt"])
 MAX_SETS_PER_MATCH = 5
 MAX_GAMES_PER_SET = 7
 
+
+
+#### User Models ####
 class UserBase(BaseModel,ABC):
     id: Optional[int] = Field(None, gt=0, read_only=True)
     password: Optional[str] = Field(None, max_length=255)
@@ -53,13 +56,33 @@ class UserCreate(UserWithValidatorsBase):
     username: str = Field(..., max_length=50)
     email: EmailStr
     password: str = Field(..., max_length=255)
+    created_at: datetime = datetime.now()
+    city: str = Field(..., max_length=100)
+    phone: str = Field(..., max_length=20)
+    
+    @validator('created_at', pre=True, always=True)
+    def default_created_at(cls, v):
+        return datetime.now()
 
 class UserUpdate(UserWithValidatorsBase):
     pass
 class UserResponse(UserBase):     
     pass
-    
-    
+
+class UserLogin(BaseModel):
+    email: EmailStr = Field(..., max_length=100)
+    password: str = Field(..., max_length=255)
+class UserLoginResponse(BaseModel):
+    id: int
+    email: EmailStr
+    username: str
+    token: str
+
+
+
+
+
+######## Athlete Models ########    
 class AthleteBase(BaseModel,ABC):
     user_id: Optional[int] = Field(None, gt=0, read_only=True)
     handedness: Optional[str] = Field(None, max_length=20)
@@ -107,7 +130,7 @@ class AthleteResponse(AthleteBase):
     
     
     
-    
+ ####### Venue Models #######   
     
 class VenueBase(BaseModel,ABC):
     venue_id: Optional[int] = Field(None, gt=0, read_only=True)
@@ -139,7 +162,7 @@ class VenueResponse(VenueBase):
     pass
 
 
-
+######## Match Models ########
 class MatchBase(BaseModel,ABC):
     match_id: Optional[int] = Field(None, gt=0,read_only=True)
     match_date: Optional[date] = Field(None)
@@ -186,6 +209,7 @@ class MatchResponse(MatchBase):
     pass
 
 
+######## Tournament Models ########
 class TournamentBase(BaseModel,ABC):
     tournament_id: Optional[int] = Field(None, gt=0, read_only=True)
     tournament_name: Optional[str] = Field(None, max_length=100)
@@ -232,7 +256,7 @@ class TournamentResponse(TournamentBase):
 
 
 
-
+######## MatchInvitation Models ########
 
 class MatchInvitationBase(BaseModel,ABC):
     invitation_id: Optional[int] = Field(None, gt=0, read_only=True)
@@ -279,7 +303,7 @@ class MatchInvitationResponse(MatchInvitationBase):
     
     
     
-    
+######## MatchScore Models ########    
     
 class MatchScoreBase(BaseModel,ABC):
     match_id: Optional[int] = Field(None, gt=0)

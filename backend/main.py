@@ -1,4 +1,6 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
 from app.database import engine
 import app.schemas as schemas
 from app.routes.user import router as user_router
@@ -15,6 +17,17 @@ def initialize_app():
     print("Tables defined by schemas created")
 
     app = FastAPI()
+    origins = [
+    "http://localhost:5173",  # React's port
+    # add more origins if needed
+    ]
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     print("App created")
         
     app.include_router(auth_router)
