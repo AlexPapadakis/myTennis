@@ -9,7 +9,7 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = 'User'
     id = Column(Integer, primary_key=True)
-    username = Column(String(50), unique=True, nullable=False)
+    username = Column(String(50), unique=True)
     email = Column(String(100), unique=True, nullable=False)
     password = Column(String(255), nullable=False)
     real_name = Column(String(50))
@@ -32,7 +32,6 @@ class Athlete(Base):
     user_id = Column(Integer,  ForeignKey('User.id'), primary_key=True)
     handedness = Column(String(20))
     height = Column(DECIMAL(5, 2))
-    weight = Column(DECIMAL(5, 2))
     backhand_type = Column(String(20))
     skill_level = Column(String(20))
     points = Column(Integer)
@@ -45,7 +44,7 @@ class Athlete(Base):
     )
 
     def __repr__(self):
-        return f"<Athlete(user_id={self.user_id}, handedness='{self.handedness}', height={self.height}, weight={self.weight}, backhand_type='{self.backhand_type}', skill_level='{self.skill_level}', points={self.points})>"
+        return f"<Athlete(user_id={self.user_id}, handedness='{self.handedness}', height={self.height}, backhand_type='{self.backhand_type}', skill_level='{self.skill_level}', points={self.points})>"
 
 
 class Venue(Base):
