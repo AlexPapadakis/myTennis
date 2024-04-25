@@ -4,7 +4,7 @@ from ..schemas import User
 from ..database import get_db
 from ..models import UserCreate,UserResponse,UserUpdate
 
-from .auth import verify_token,admin_only,get_roles
+from .auth import admin_only
 
 
 from .error_handler import execute_query_and_handle_errors

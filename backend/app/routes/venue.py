@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from ..schemas import Venue
 from ..models import VenueCreate, VenueResponse, VenueUpdate
 from ..database import get_db
-from .auth import verify_token, admin_only, get_roles
+from .auth import admin_only
 from .error_handler import execute_query_and_handle_errors
 
 router = APIRouter()

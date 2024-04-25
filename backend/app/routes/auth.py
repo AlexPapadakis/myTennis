@@ -1,11 +1,11 @@
 from typing import Optional
 from jose import JWTError, jwt
 from fastapi import Depends, HTTPException, status, APIRouter
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime, timedelta
-
+from pydantic import EmailStr
 from ..schemas import User,UserRoles,Roles
-from ..models import UserCreate
+from ..models import UserCreate, UserLogIn
 from sqlalchemy.orm import Session
 from ..database import get_db
 
@@ -26,8 +26,8 @@ router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-def authenticate_user(username: str, password: str, db: Session):
-    user = db.query(User).filter(User.username == username).first()
+def authenticate_user(email: EmailStr, password: str, db: Session):
+    user = db.query(User).filter(User.email == email).first()
     if user is None:
         return False
     if not verify_password(user.password,password):
@@ -48,24 +48,37 @@ def verify_password(user_password:str ,password: str):
     return False
 
 @router.post("/token")
-def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    
-    print("Logging in...")
-    user = authenticate_user(form_data.username, form_data.password, db)
+def login_for_access_token(login_data: UserLogIn , db: Session = Depends(get_db)):
+    user = authenticate_user(login_data.email, login_data.password, db)
     
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
+            detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
     
     user_roles = get_user_roles(user, db)     
+    print("User roles: ",user_roles)
     access_token_expires = timedelta(minutes=30)
     access_token = create_access_token(
-        data={"sub": user.username,"roles":user_roles}, expires_delta=access_token_expires
+        data={"sub": user.email,"roles":user_roles}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.post("/login/")
+def login(login_data: UserLogIn, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.email == login_data.email).first()
+    authenticated_user = authenticate_user(login_data.email, login_data.password, db)
+    
+    if not authenticated_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return authenticated_user
 
 
 
@@ -80,20 +93,23 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = timedel
 def verify_token(token: str = Depends(oauth2_scheme)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
+        email: str = payload.get("sub")
         roles: list = payload.get("roles")
-        if username is None:
+        print("verify token roles: ",roles)
+        if email is None:
             raise HTTPException(status_code=401, detail="Invalid token")
-        return username,roles
+        return email,roles
+    
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
     
 
-def get_roles(token_data: tuple = Depends(verify_token)):
-    username, roles = token_data
+def get_token_roles(token_data: tuple = Depends(verify_token)):
+    email, roles = token_data
     return roles
 
-def admin_only(roles: list = Depends(get_roles)):
+
+def admin_only(roles: list = Depends(get_token_roles)):
     if "admin" in roles:
         print("Admin access granted")
     else:

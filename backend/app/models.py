@@ -15,8 +15,12 @@ MAX_SETS_PER_MATCH = 5
 MAX_GAMES_PER_SET = 7
 
 
+# class OAuth2PasswordRequestFormEmail(BaseModel):
+#     email: EmailStr
+#     password: str
+#     scope: Optional[str] = None
+#     grant_type: str = 'password'
 
-#### User Models ####
 class UserBase(BaseModel,ABC):
     id: Optional[int] = Field(None, gt=0, read_only=True)
     password: Optional[str] = Field(None, max_length=255)
@@ -53,41 +57,28 @@ class UserWithValidatorsBase(UserBase, ABC):
         return value
 
 class UserCreate(UserWithValidatorsBase):
-    username: str = Field(..., max_length=50)
-    email: EmailStr
+    email: EmailStr = Field(..., max_length=100)
     password: str = Field(..., max_length=255)
-    created_at: datetime = datetime.now()
-    city: str = Field(..., max_length=100)
-    phone: str = Field(..., max_length=20)
     
-    @validator('created_at', pre=True, always=True)
-    def default_created_at(cls, v):
-        return datetime.now()
+class UserLogIn(BaseModel):
+    email: EmailStr = Field(..., max_length=100)
+    password: str = Field(..., max_length=255)
 
+# class UserCompleteSignUp(UserWithValidatorsBase):
+#     username: str = Field(..., max_length=50)
+#     real_name: str = Field(..., max_length=50)
+#     city: str = Field(..., max_length=100)                       
+                           
 class UserUpdate(UserWithValidatorsBase):
     pass
 class UserResponse(UserBase):     
     pass
-
-class UserLogin(BaseModel):
-    email: EmailStr = Field(..., max_length=100)
-    password: str = Field(..., max_length=255)
-class UserLoginResponse(BaseModel):
-    id: int
-    email: EmailStr
-    username: str
-    token: str
-
-
-
-
-
-######## Athlete Models ########    
+    
+    
 class AthleteBase(BaseModel,ABC):
     user_id: Optional[int] = Field(None, gt=0, read_only=True)
     handedness: Optional[str] = Field(None, max_length=20)
     height: Optional[Decimal] = Field(None, gt=0, le=999.99)
-    weight: Optional[Decimal] = Field(None, gt=0, le=999.99)
     backhand_type: Optional[str] = Field(None, max_length=20)
     skill_level: Optional[str] = Field(None, max_length=20)
     points: Optional[int] = Field(None, ge=0)
@@ -120,7 +111,6 @@ class AthleteWithValidators(AthleteBase,ABC):
 class AthleteCreate(AthleteWithValidators):
     handedness: str = Field(..., max_length=20)
     height: Decimal = Field(..., gt=0, le=999.99)
-    weight: Decimal = Field(..., gt=0, le=999.99)
     backhand_type: str = Field(..., max_length=20)
     skill_level: str = Field(..., max_length=20)
 class AthleteUpdate(AthleteWithValidators):
@@ -130,7 +120,7 @@ class AthleteResponse(AthleteBase):
     
     
     
- ####### Venue Models #######   
+    
     
 class VenueBase(BaseModel,ABC):
     venue_id: Optional[int] = Field(None, gt=0, read_only=True)
@@ -162,7 +152,7 @@ class VenueResponse(VenueBase):
     pass
 
 
-######## Match Models ########
+
 class MatchBase(BaseModel,ABC):
     match_id: Optional[int] = Field(None, gt=0,read_only=True)
     match_date: Optional[date] = Field(None)
@@ -209,7 +199,6 @@ class MatchResponse(MatchBase):
     pass
 
 
-######## Tournament Models ########
 class TournamentBase(BaseModel,ABC):
     tournament_id: Optional[int] = Field(None, gt=0, read_only=True)
     tournament_name: Optional[str] = Field(None, max_length=100)
@@ -256,7 +245,7 @@ class TournamentResponse(TournamentBase):
 
 
 
-######## MatchInvitation Models ########
+
 
 class MatchInvitationBase(BaseModel,ABC):
     invitation_id: Optional[int] = Field(None, gt=0, read_only=True)
@@ -303,7 +292,7 @@ class MatchInvitationResponse(MatchInvitationBase):
     
     
     
-######## MatchScore Models ########    
+    
     
 class MatchScoreBase(BaseModel,ABC):
     match_id: Optional[int] = Field(None, gt=0)

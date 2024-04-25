@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from ..schemas import Athlete
 from ..database import get_db
 from ..models import AthleteCreate,AthleteResponse,AthleteUpdate
-from .auth import verify_token, admin_only, get_roles
+from .auth import admin_only
 from .error_handler import execute_query_and_handle_errors
 
 router = APIRouter()
