@@ -6,6 +6,9 @@ import LoginForm from './components/LoginForm.jsx'
 import AthleteInfoForm from './components/AthleteInfoForm.jsx'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
+import ProfilePage from './components/ProfilePage.jsx'
+
+
 import AllUsers from './components/all_users.jsx'
 import {Link} from 'react-router-dom';
 
@@ -16,22 +19,23 @@ function App() {
       <nav>
         <ul>
           <Router>
-          <li><Link to="/login">Login</Link></li>        
-          <li><Link to="/signup">Sign Up</Link></li>
-          <li><Link to="/signup/complete">Complete Sign Up</Link></li>
-          <li><Link to="/athleteInfoForm">Set up your athlete profile</Link></li>
-
-          <li><Link to="/users/"  >Users</Link></li>
+            <li><Link to="/login">Login</Link></li>        
+            <li><Link to="/signup">Sign Up</Link></li>
+            <li><Link to="/signup/complete">Complete Sign Up</Link></li>
+            <li><Link to="/athleteInfoForm">Set up your athlete profile</Link></li>
+            <li><Link to="/profile">Profile</Link></li>
+            <li><Link to="/users/"  >Users</Link></li>
+            
             <Routes>
               <Route path="/login" element={<LoginForm />} />
               <Route path="/signup" element={<BasicSignUpForm />} />
               <Route path="/signup/complete" element={<CompleteSignUpForm />} />
               <Route path="/athleteInfoForm" element={<AthleteInfoForm />} />
               <Route path="/users/" element={<AllUsers />} />
+              <Route path="/profile" element={<ProfilePage />} />
             </Routes>
           </Router>
   
-          <li><a href="#">Your profile</a></li>
         </ul>
       </nav>
     <hr />

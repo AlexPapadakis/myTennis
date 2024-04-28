@@ -9,6 +9,14 @@ from .error_handler import execute_query_and_handle_errors
 
 router = APIRouter()
 
+@router.get("/athletes/me", response_model=AthleteResponse)
+def read_athlete_me(current_user_id: int = Depends(get_id_from_token), db: Session = Depends(get_db)):
+    user_id = current_user_id
+    print("Reading athlete with id: ", user_id, "...")
+    athlete = execute_query_and_handle_errors(lambda: db.query(Athlete).filter(Athlete.user_id == user_id).first(), "Athlete")
+    return athlete
+
+
 @router.post("/athletes/me", response_model=AthleteResponse)
 def create_athlete_me(athlete: AthleteCreate, current_user_id: int = Depends(get_id_from_token), db: Session = Depends(get_db)):
     print("Creating athlete...")
