@@ -62,7 +62,7 @@ def login_for_access_token(login_data: UserLogIn , db: Session = Depends(get_db)
     print("User roles: ",user_roles)
     access_token_expires = timedelta(minutes=30)
     access_token = create_access_token(
-        data={"sub": user.email,"roles":user_roles}, expires_delta=access_token_expires
+        data={"sub": user.email,"id":user.id,"roles":user_roles}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -95,17 +95,18 @@ def verify_token(token: str = Depends(oauth2_scheme)):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
         roles: list = payload.get("roles")
+        id: int = payload.get("id")
         print("verify token roles: ",roles)
         if email is None:
             raise HTTPException(status_code=401, detail="Invalid token")
-        return email,roles
+        return email,roles,id
     
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
     
 
 def get_token_roles(token_data: tuple = Depends(verify_token)):
-    email, roles = token_data
+    email, roles,id = token_data
     return roles
 
 
@@ -114,3 +115,7 @@ def admin_only(roles: list = Depends(get_token_roles)):
         print("Admin access granted")
     else:
         raise HTTPException(status_code=401, detail="Unauthorized access")
+    
+def get_id_from_token(token_data: tuple = Depends(verify_token)):
+    email, roles,id = token_data
+    return id

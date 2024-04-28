@@ -15,12 +15,6 @@ MAX_SETS_PER_MATCH = 5
 MAX_GAMES_PER_SET = 7
 
 
-# class OAuth2PasswordRequestFormEmail(BaseModel):
-#     email: EmailStr
-#     password: str
-#     scope: Optional[str] = None
-#     grant_type: str = 'password'
-
 class UserBase(BaseModel,ABC):
     id: Optional[int] = Field(None, gt=0, read_only=True)
     password: Optional[str] = Field(None, max_length=255)

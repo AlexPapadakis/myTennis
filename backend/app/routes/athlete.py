@@ -3,10 +3,35 @@ from sqlalchemy.orm import Session
 from ..schemas import Athlete
 from ..database import get_db
 from ..models import AthleteCreate,AthleteResponse,AthleteUpdate
-from .auth import admin_only
+from .auth import admin_only,get_id_from_token
+from typing import List,Tuple
 from .error_handler import execute_query_and_handle_errors
 
 router = APIRouter()
+
+@router.post("/athletes/me", response_model=AthleteResponse)
+def create_athlete_me(athlete: AthleteCreate, current_user_id: int = Depends(get_id_from_token), db: Session = Depends(get_db)):
+    print("Creating athlete...")
+    athlete_data = athlete.model_dump()
+    athlete_data['user_id'] = current_user_id
+    db_athlete = Athlete(**athlete_data)
+    db.add(db_athlete)
+    db.commit()
+    db.refresh(db_athlete)
+    return db_athlete
+
+
+@router.put("/athletes/me", response_model=AthleteResponse)
+def update_athlete_me(athlete: AthleteUpdate, current_user: Tuple[str, List[str], int] = Depends(get_id_from_token), db: Session = Depends(get_db)):
+    _, _, user_id = current_user
+    db_athlete = execute_query_and_handle_errors(lambda: db.query(Athlete).filter(Athlete.user_id == user_id).first(), "Athlete")
+    for attr, value in athlete.model_dump().items():
+        if attr is not None and value is not None:
+            setattr(db_athlete, attr, value)
+    db.commit()
+    db.refresh(db_athlete)
+    print("Athlete updated successfully.")
+    return db_athlete
 
 
 @router.get("/athletes/", response_model=list[AthleteResponse], dependencies=[Depends(admin_only)])

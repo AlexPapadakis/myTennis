@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-const LoginForm = () => {
+function LoginForm  () {
 
     const handleSubmit = (e) => {
         e.preventDefault();

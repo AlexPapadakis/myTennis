@@ -1,18 +1,17 @@
-import React,{useState} from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
+import { KJUR } from 'jsrsasign';
 
-
-
-function CompleteSignUpForm(){
+function CompleteSignUpForm() {
     const [errors, setErrors] = useState({});
 
-    const handleSubmit = async (e) =>{
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         const city = e.target.city.value;
         const username = e.target.username.value;
-        const realname = e.target.realname.value;
-       
+        const real_name = e.target.realname.value;
+
         let errors = {};
         if (!city) {
             errors.city = 'City is required';
@@ -20,20 +19,36 @@ function CompleteSignUpForm(){
         if (!username) {
             errors.username = 'Username is required';
         }
-        if (!realname) {
-            errors.realname = 'Realname is required';
+
+        if (!real_name) {
+            errors.real_name = 'Realname is required';
         }
-            
+
         if (Object.keys(errors).length > 0) {
             setErrors(errors);
         } else {
-            const response = await axios.put('http://localhost:8000/users', {
-            city,
-            realname,
-            username
-            });
+            const token = localStorage.getItem('token');
+            // const decoded_token = KJUR.jws.JWS.parse(token);
+            // const user_id = decoded_token.payloadObj.id;
+            // const response = await axios.put(`http://localhost:8000/users/${user_id}`, {
+            //     city,
+            //     realname,
+            //     username
+            // });
+            const response = await axios.put(`http://localhost:8000/users/me`, 
+                {
+                    city,
+                    real_name,
+                    username
+                }, 
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}` // Include the token in the Authorization header
+                    }
+                });
             console.log(response.data);
-            }
+        }
+
     };
 
     return (
@@ -43,7 +58,7 @@ function CompleteSignUpForm(){
                 <label>
                     Real Name
                     <input type="text" name="realname" />
-                    {errors.realname && <p>{errors.realname}</p>}
+                    {errors.real_name && <p>{errors.real_name}</p>}
                 </label>
                 <label>
                     Username

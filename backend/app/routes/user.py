@@ -1,10 +1,11 @@
+from typing import List, Tuple
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..schemas import User
 from ..database import get_db
 from ..models import UserCreate,UserResponse,UserUpdate
 
-from .auth import admin_only
+from .auth import admin_only,verify_token
 
 
 from .error_handler import execute_query_and_handle_errors
@@ -12,6 +13,30 @@ from .error_handler import execute_query_and_handle_errors
 
 
 router = APIRouter()
+
+
+@router.get("/users/me", response_model=UserResponse)
+def read_users_me(current_user: Tuple[str, List[str], int] = Depends(verify_token), db: Session = Depends(get_db)):
+    _, _, user_id = current_user
+    user = execute_query_and_handle_errors(lambda: db.query(User).filter(User.id == user_id).first(), "User")
+    return user
+
+@router.put("/users/me" , response_model=UserResponse)
+def update_user_me(user: UserUpdate, current_user: Tuple[str, List[str], int] = Depends(verify_token), db: Session = Depends(get_db)):
+    _, _, user_id = current_user
+    db_user = execute_query_and_handle_errors(lambda: db.query(User).filter(User.id == user_id).first(), "User")
+    print(user)
+    for attr, value in user.model_dump().items():
+        if attr is not None and value is not None:
+            print(attr, value)
+            setattr(db_user, attr, value)
+    db.commit()
+    db.refresh(db_user)
+    
+    print("User updated successfully.")
+    
+    return db_user
+
 
 
 

@@ -3,6 +3,7 @@ import Footer from './components/Footer.jsx'
 import CompleteSignUpForm from './components/CompleteSignUpForm.jsx'
 import BasicSignUpForm from './components/BasicSignUpForm.jsx'
 import LoginForm from './components/LoginForm.jsx'
+import AthleteInfoForm from './components/AthleteInfoForm.jsx'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 import AllUsers from './components/all_users.jsx'
@@ -17,13 +18,15 @@ function App() {
           <Router>
           <li><Link to="/login">Login</Link></li>        
           <li><Link to="/signup">Sign Up</Link></li>
+          <li><Link to="/signup/complete">Complete Sign Up</Link></li>
+          <li><Link to="/athleteInfoForm">Set up your athlete profile</Link></li>
 
           <li><Link to="/users/"  >Users</Link></li>
             <Routes>
               <Route path="/login" element={<LoginForm />} />
               <Route path="/signup" element={<BasicSignUpForm />} />
               <Route path="/signup/complete" element={<CompleteSignUpForm />} />
-
+              <Route path="/athleteInfoForm" element={<AthleteInfoForm />} />
               <Route path="/users/" element={<AllUsers />} />
             </Routes>
           </Router>
