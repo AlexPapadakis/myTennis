@@ -25,7 +25,6 @@ def read_users_me(current_user: Tuple[str, List[str], int] = Depends(verify_toke
 def update_user_me(user: UserUpdate, current_user: Tuple[str, List[str], int] = Depends(verify_token), db: Session = Depends(get_db)):
     _, _, user_id = current_user
     db_user = execute_query_and_handle_errors(lambda: db.query(User).filter(User.id == user_id).first(), "User")
-    print(user)
     for attr, value in user.model_dump().items():
         if attr is not None and value is not None:
             print(attr, value)
@@ -33,7 +32,7 @@ def update_user_me(user: UserUpdate, current_user: Tuple[str, List[str], int] = 
     db.commit()
     db.refresh(db_user)
     
-    print("User updated successfully.")
+    print("User with id: ", user_id, " updated successfully.")
     
     return db_user
 

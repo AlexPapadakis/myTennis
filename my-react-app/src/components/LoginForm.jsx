@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
-function LoginForm  () {
+function LoginForm  ({ onLogin }) {
 
+    const navigate = useNavigate();
     const handleSubmit = (e) => {
         e.preventDefault();
         const email = e.target.email.value;
@@ -14,6 +16,8 @@ function LoginForm  () {
         }).then((response) => {
             localStorage.setItem('token', response.data.access_token);
             console.log(response.data);
+            onLogin(); // call the function passed as a prop
+            navigate('/');
         }).catch((error) => {
             console.error(error);
         });

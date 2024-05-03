@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-function AthleteInfoForm() {
+function AthleteInfoForm({ onAthleteInfoSubmit}) {
     const [handedness, setHandedness] = useState('');
     const [height, setHeight] = useState('');
     const [backhand_type, setBackhandType] = useState('');
@@ -24,6 +24,7 @@ function AthleteInfoForm() {
             }
         ).then((response) => {
             console.log(response.data);
+            onAthleteInfoSubmit();
         }
         ).catch((error) => {
             console.log(error);

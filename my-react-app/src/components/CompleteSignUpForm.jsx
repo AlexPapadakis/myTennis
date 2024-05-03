@@ -53,7 +53,7 @@ function CompleteSignUpForm() {
 
     return (
         <div>
-            <h1>Sign Up</h1>
+            <h1>Complete Basic Sign Up</h1>
             <form onSubmit={handleSubmit}>
                 <label>
                     Real Name
@@ -71,7 +71,7 @@ function CompleteSignUpForm() {
                     {errors.city && <p>{errors.city}</p>}
                 </label>
                 <br />
-                <button type="submit">Sign Up</button>
+                <button type="submit">Submit</button>
             </form>
         </div>
     );

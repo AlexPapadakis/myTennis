@@ -4,8 +4,8 @@ import AthleteCard from "./AthleteCard";
 import axios from  "axios";
 
 function ProfilePage() {
-    const [user, setUser] = useState('');
-    const [athlete, setAthlete] = useState('');
+    const [user, setUser] = useState();
+    const [athlete, setAthlete] = useState();
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -16,6 +16,7 @@ function ProfilePage() {
             axios.get("http://localhost:8000/athletes/me/", { headers }) // replace with your actual API endpoint
         ]).then(([userResponse, athleteResponse]) => {
             setUser(userResponse.data);
+            athleteResponse.data.height = Number(athleteResponse.data.height);
             setAthlete(athleteResponse.data);
         }).catch((error) => {
             console.error(error);
@@ -24,8 +25,8 @@ function ProfilePage() {
 
     return (
         <div>
-            <UserProfileCard user={user} />
-            <AthleteCard athlete={athlete} />
+            {user && <UserProfileCard user={user} />}
+            {athlete && <AthleteCard athlete={athlete} />}
         </div>
     );
 }
