@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { KJUR } from 'jsrsasign';
 
-function CompleteSignUpForm() {
+function CompleteSignUpForm({ onCompleteSignUp}) {
     const [errors, setErrors] = useState({});
 
     const handleSubmit = async (e) => {
