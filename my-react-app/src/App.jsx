@@ -14,12 +14,18 @@ import ProfilePage from './components/ProfilePage.jsx'
 import EditProfileInfoForm from './components/EditProfileInfoForm.jsx'
 import AllUsers from './components/all_users.jsx'
 import Logout from './components/Logout.jsx'
+import AthletesInCity from './components/AthletesInCity.jsx';
+
 
 function App() {
 
   const [isLoggedIn, setIsLoggedIn] = useState(true)
   const [completedSignUp,setCompletedSignUp] = useState('')
   const [isAthlete, setIsAthlete] = useState(false)
+
+  const [city, setCity] = useState(null);
+
+ 
 
   const handleLogin = () => {
     setIsLoggedIn(true);
@@ -34,13 +40,14 @@ function App() {
     setCompletedSignUp(true);
   };
   
+
+  
   useEffect (() => {
       axios.get('http://localhost:8000/users/me/', {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
       }).then((response) => {
-
       console.log(response)
        if (response.data.city==null
             &&response.data.username==null
@@ -51,7 +58,7 @@ function App() {
         else{
           console.log('completed')
           setCompletedSignUp(true)
-        }
+          setCity(response.data.city);        }
       }
       ).catch((error) => {
         if (error.response && error.response.status === 401) {
@@ -96,10 +103,12 @@ function App() {
     }
     else{
       setIsLoggedIn(true)
+      
     }
   }
   , [isLoggedIn]);
 
+  
 
   return (
     <>
@@ -116,7 +125,7 @@ function App() {
             {!isAthlete && isLoggedIn && <li><Link to="/athleteInfoForm">Set up your athlete profile</Link></li>}
             {/*<li><Link to="/users/"  >Users</Link></li>*/}
             {isLoggedIn&&<li><Link to="/logout">Log out</Link></li>}
-    
+            {isLoggedIn && completedSignUp && isAthlete && <li><Link to="/findPlayers">Find Players</Link></li>}
             
             <Routes>
               <Route path="/login" element={<LoginForm onLogin={handleLogin}/>} />
@@ -127,6 +136,9 @@ function App() {
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/editProfileInfo" element={<EditProfileInfoForm />} />
               <Route path="/logout" element={<Logout  onLogout={handleLogout} />} />
+
+
+              <Route path="/findPlayers" element={<AthletesInCity city={city}/>} />
             </Routes>
           </Router>
   

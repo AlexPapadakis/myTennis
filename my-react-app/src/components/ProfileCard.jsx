@@ -3,21 +3,17 @@ import UserProfileCard from "./UserProfileCard";
 import AthleteCard from "./AthleteCard";
 import axios from  "axios";
 
-function ProfilePage() {
+function ProfileCard({athlete}) {
     const [user, setUser] = useState();
-    const [athlete, setAthlete] = useState();
-
+    console.log(athlete);
     useEffect(() => {
         const token = localStorage.getItem("token");
         const headers = { Authorization: `Bearer ${token}` };
 
         Promise.all([
-            axios.get("http://localhost:8000/users/me/", { headers }),
-            axios.get("http://localhost:8000/athletes/me/", { headers }) 
-        ]).then(([userResponse, athleteResponse]) => {
+            axios.get(`http://localhost:8000/users/${athlete.user_id}`, { headers }),
+        ]).then(([userResponse]) => {
             setUser(userResponse.data);
-            athleteResponse.data.height = Number(athleteResponse.data.height);
-            setAthlete(athleteResponse.data);
         }).catch((error) => {
             console.error(error);
         });
@@ -31,4 +27,4 @@ function ProfilePage() {
     );
 }
 
-export default ProfilePage;
+export default ProfileCard;

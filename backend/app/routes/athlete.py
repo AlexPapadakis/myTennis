@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from ..schemas import Athlete
+from ..schemas import Athlete,User
 from ..database import get_db
-from ..models import AthleteCreate,AthleteResponse,AthleteUpdate
+from ..models import AthleteCreate,AthleteResponse,AthleteUpdate,UserResponse
 from .auth import admin_only,get_id_from_token
-from typing import List,Tuple
+from typing import List,Tuple, Optional
 from .error_handler import execute_query_and_handle_errors
+
 
 router = APIRouter()
 
@@ -42,9 +43,23 @@ def update_athlete_me(athlete: AthleteUpdate, current_user: Tuple[str, List[str]
     return db_athlete
 
 
-@router.get("/athletes/", response_model=list[AthleteResponse], dependencies=[Depends(admin_only)])
-def read_athletes(db: Session = Depends(get_db)):
-    athletes = execute_query_and_handle_errors(lambda: db.query(Athlete).all(), "Athletes")
+#, dependencies=[Depends(admin_only)]
+@router.get("/athletes/", response_model=list[AthleteResponse])
+def read_athletes(db: Session = Depends(get_db), city: Optional[str] = None ,gender:Optional[str]=None, skill_level: Optional[str] = None):
+    query = db.query(Athlete).join(User).filter(Athlete.user_id == User.id)
+    if city:
+        print("Reading athletes from city: ", city, "...")
+        query = query.filter(User.city == city)
+    if skill_level:
+        print("Reading athletes with skill level: ", skill_level, "...")
+        query = query.filter(Athlete.skill_level == skill_level)
+    if gender:
+        print("Reading athletes with gender: ",gender,"...")
+        query = query.filter(User.gender==gender)
+
+        
+        
+    athletes = execute_query_and_handle_errors(lambda: query.all(), "Athletes")
     return athletes
 
 

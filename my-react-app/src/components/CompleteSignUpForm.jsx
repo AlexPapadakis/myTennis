@@ -46,6 +46,7 @@ function CompleteSignUpForm({ onCompleteSignUp}) {
                         Authorization: `Bearer ${token}` // Include the token in the Authorization header
                     }
                 });
+            onCompleteSignUp();
             console.log(response.data);
         }
 

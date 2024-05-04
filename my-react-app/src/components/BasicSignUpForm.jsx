@@ -1,18 +1,18 @@
 import React,{useState} from 'react';
 import axios from 'axios';
-
-
+import { useNavigate } from 'react-router-dom';
 
 function BasicSignUpForm(){
     const [errors, setErrors] = useState({});
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) =>{
         e.preventDefault();
         
         const email = e.target.email.value;
         const password = e.target.password.value;
-       
-       
+        
+        
         let errors = {};
         
         if (!email) {
@@ -30,6 +30,7 @@ function BasicSignUpForm(){
             password
             });
             console.log(response.data);
+            navigate('/login');
             }
     };
 
