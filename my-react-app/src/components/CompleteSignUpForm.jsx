@@ -27,14 +27,7 @@ function CompleteSignUpForm({ onCompleteSignUp}) {
         if (Object.keys(errors).length > 0) {
             setErrors(errors);
         } else {
-            const token = localStorage.getItem('token');
-            // const decoded_token = KJUR.jws.JWS.parse(token);
-            // const user_id = decoded_token.payloadObj.id;
-            // const response = await axios.put(`http://localhost:8000/users/${user_id}`, {
-            //     city,
-            //     realname,
-            //     username
-            // });
+
             const response = await axios.put(`http://localhost:8000/users/me`, 
                 {
                     city,
@@ -42,9 +35,7 @@ function CompleteSignUpForm({ onCompleteSignUp}) {
                     username
                 }, 
                 {
-                    headers: {
-                        Authorization: `Bearer ${token}` // Include the token in the Authorization header
-                    }
+                    withCredentials: true
                 });
             onCompleteSignUp();
             console.log(response.data);

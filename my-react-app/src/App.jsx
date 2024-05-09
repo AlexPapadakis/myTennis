@@ -12,20 +12,22 @@ import LoginForm from './components/LoginForm.jsx'
 import AthleteInfoForm from './components/AthleteInfoForm.jsx'
 import ProfilePage from './components/ProfilePage.jsx'
 import EditProfileInfoForm from './components/EditProfileInfoForm.jsx'
-import AllUsers from './components/all_users.jsx'
 import Logout from './components/Logout.jsx'
 import AthletesInCity from './components/AthletesInCity.jsx';
 
+import MatchInvitationForm from './components/MatchInvitationForm.jsx';
+
+import  UserProvider  from './components/UserProvider';
 
 function App() {
 
   const [isLoggedIn, setIsLoggedIn] = useState(true)
   const [completedSignUp,setCompletedSignUp] = useState('')
   const [isAthlete, setIsAthlete] = useState(false)
-
-  const [city, setCity] = useState(null);
+  const [city, setCity] = useState(null)
 
  
+  
 
   const handleLogin = () => {
     setIsLoggedIn(true);
@@ -43,10 +45,9 @@ function App() {
 
   
   useEffect (() => {
-      axios.get('http://localhost:8000/users/me/', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
+      axios.get('http://localhost:8000/users/me/', 
+      {
+        withCredentials: true,
       }).then((response) => {
       console.log(response)
        if (response.data.city==null
@@ -63,7 +64,6 @@ function App() {
       ).catch((error) => {
         if (error.response && error.response.status === 401) {
           setIsLoggedIn(false);
-          localStorage.removeItem('token');
         }else{
           console.log(error);
         }
@@ -75,10 +75,9 @@ function App() {
   useEffect (() => {
     if(isLoggedIn){
       axios.get('http://localhost:8000/athletes/me/', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      }).then((response) => { 
+        withCredentials: true,
+        })
+      .then((response) => { 
         if (response.data.height==null
             ||response.data.handedness==null
             ||response.data.backhand_type==null
@@ -97,25 +96,17 @@ function App() {
   }
   , [isLoggedIn,isAthlete]);
 
-  useEffect (() => {
-    if(localStorage.getItem('token') === null){
-      setIsLoggedIn(false)
-    }
-    else{
-      setIsLoggedIn(true)
-      
-    }
-  }
-  , [isLoggedIn]);
 
-  
 
   return (
+
+    <Router>
+
+    <UserProvider >
     <>
     <Header />
       <nav>
         <ul>
-          <Router>
             
             {isLoggedIn && isAthlete && <li><Link to="/profile">Profile</Link></li>}
             {isLoggedIn && <li><Link to="/editProfileInfo">Edit Profile Info</Link></li>}
@@ -123,7 +114,6 @@ function App() {
             {!isLoggedIn && <li><Link to="/signup">Sign Up</Link></li>}
             {!completedSignUp && isLoggedIn && <li><Link to="/signup/complete">Complete Sign Up</Link></li>}            
             {!isAthlete && isLoggedIn && <li><Link to="/athleteInfoForm">Set up your athlete profile</Link></li>}
-            {/*<li><Link to="/users/"  >Users</Link></li>*/}
             {isLoggedIn&&<li><Link to="/logout">Log out</Link></li>}
             {isLoggedIn && completedSignUp && isAthlete && <li><Link to="/findPlayers">Find Players</Link></li>}
             
@@ -132,21 +122,23 @@ function App() {
               <Route path="/signup" element={<BasicSignUpForm />} />
               <Route path="/signup/complete" element={<CompleteSignUpForm onCompleteSignUp={handleCompleteSignUpSubmit}/>} />
               <Route path="/athleteInfoForm" element={<AthleteInfoForm onAthleteInfoSubmit={handleAthleteSubmit} />} />
-              <Route path="/users/" element={<AllUsers />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/editProfileInfo" element={<EditProfileInfoForm />} />
               <Route path="/logout" element={<Logout  onLogout={handleLogout} />} />
 
 
-              <Route path="/findPlayers" element={<AthletesInCity city={city}/>} />
+              <Route path="/findPlayers" element={<AthletesInCity />} />
+              <Route path="/matchInvitationForm/:athleteId" element={<MatchInvitationForm />} />
             </Routes>
-          </Router>
   
         </ul>
       </nav>
     <hr />
     <Footer />
     </>
+    </UserProvider>
+    </Router>
+
   );
 }
 

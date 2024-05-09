@@ -10,13 +10,12 @@ function EditProfileInfoForm() {
     const [user, setUser] = useState('');
     const [athlete, setAthlete] = useState('');
 
-    const [message, setMessage] = useState(''); // Add this line
+    const [message, setMessage] = useState(''); 
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
-        const headers = { Authorization: `Bearer ${token}` };
+
     
-        axios.get("http://localhost:8000/users/me/", { headers })
+        axios.get("http://localhost:8000/users/me/",  { withCredentials: true})
             .then(response => {
                 setUser(response.data);
             })
@@ -24,7 +23,7 @@ function EditProfileInfoForm() {
                 console.error("Error fetching user data: ", error);
             });
     
-        axios.get("http://localhost:8000/athletes/me/", { headers })
+        axios.get("http://localhost:8000/athletes/me/", { withCredentials: true })
             .then(response => {
                 setAthlete(response.data);
             })
@@ -49,9 +48,9 @@ function EditProfileInfoForm() {
                     <EditableField label="Real Name" initialValue={user.real_name} className="user" fieldName="real_name" />
                     <EditableField label="Gender" initialValue={user.gender} className="user" fieldName="gender" type="select" options = {['Male', 'Female', 'Other']} />
                     <EditableField label="Phone" initialValue={user.phone} className="user" fieldName="phone" />
-                    <EditableField label="Birthday" initialValue={user.birthday} className="user" fieldName="birthday" />
+                    <EditableField label="Birthday" initialValue={user.birthday} className="user" fieldName="birthday" type= "date"/>
                     <EditableField label="Address" initialValue={user.address} className="user" fieldName="address" />
-                    <EditableField label="City" initialValue={user.city} className="user" fieldName="city" />
+                    <EditableField label="City" initialValue={user.city} className="user" fieldName="city" type="select" options={['Thessaloniki']}/>
                     <EditableField label="Postal Code" initialValue={user.postal_code} className="user" fieldName="postal_code" />
                 </>
             )}

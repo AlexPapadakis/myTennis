@@ -13,8 +13,10 @@ function LoginForm  ({ onLogin }) {
         axios.post('http://localhost:8000/token', {
             email,
             password
+        }, {
+            withCredentials: true
         }).then((response) => {
-            localStorage.setItem('token', response.data.access_token);
+            // localStorage.setItem('token', response.data.access_token);
             console.log(response.data);
             onLogin(); // call the function passed as a prop
             navigate('/');

@@ -18,9 +18,7 @@ function AthleteInfoForm({ onAthleteInfoSubmit}) {
             skill_level
         },
             {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`
-                }
+                withCredentials: true
             }
         ).then((response) => {
             console.log(response.data);

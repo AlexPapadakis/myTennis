@@ -7,11 +7,11 @@ function ProfileCard({athlete}) {
     const [user, setUser] = useState();
     console.log(athlete);
     useEffect(() => {
-        const token = localStorage.getItem("token");
-        const headers = { Authorization: `Bearer ${token}` };
 
         Promise.all([
-            axios.get(`http://localhost:8000/users/${athlete.user_id}`, { headers }),
+            axios.get(`http://localhost:8000/users/${athlete.user_id}`, 
+               {withCredentials: true}
+            ),
         ]).then(([userResponse]) => {
             setUser(userResponse.data);
         }).catch((error) => {

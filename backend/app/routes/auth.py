@@ -1,6 +1,7 @@
 from typing import Optional
+from fastapi.responses import JSONResponse
 from jose import JWTError, jwt
-from fastapi import Depends, HTTPException, status, APIRouter
+from fastapi import Depends, HTTPException, status, APIRouter, Request,Response
 from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime, timedelta
 from pydantic import EmailStr
@@ -25,30 +26,14 @@ router = APIRouter()
  
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-
-def authenticate_user(email: EmailStr, password: str, db: Session):
-    user = db.query(User).filter(User.email == email).first()
-    if user is None:
-        return False
-    if not verify_password(user.password,password):
-        return False
-    return user
-
 def get_user_roles(user: User, db: Session):
     roles = db.query(Roles).join(UserRoles).filter(UserRoles.user_id == user.id).all()
     roles_names = [role.name for role in roles]
     return roles_names
     
-    
-def verify_password(user_password:str ,password: str):
-    if pwd_context.verify(password, user_password):
-        print("Password verified")
-        return True
-    print("Password not verified")
-    return False
-
 @router.post("/token")
 def login_for_access_token(login_data: UserLogIn , db: Session = Depends(get_db)):
+
     user = authenticate_user(login_data.email, login_data.password, db)
     
     if not user:
@@ -64,21 +49,33 @@ def login_for_access_token(login_data: UserLogIn , db: Session = Depends(get_db)
     access_token = create_access_token(
         data={"sub": user.email,"id":user.id,"roles":user_roles}, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    response = JSONResponse(content={"user_id": user.id})
 
-
-@router.post("/login/")
-def login(login_data: UserLogIn, db: Session = Depends(get_db)):
-    db_user = db.query(User).filter(User.email == login_data.email).first()
-    authenticated_user = authenticate_user(login_data.email, login_data.password, db)
+    print("Setting cookie")
+    response.set_cookie(key="token", value=f"Bearer {access_token}", secure=False, httponly=True,samesite='Lax')
     
-    if not authenticated_user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    return authenticated_user
+    return response
+
+
+
+
+def authenticate_user(email: EmailStr, password: str, db: Session):
+    user = db.query(User).filter(User.email == email).first()
+    if user is None:
+        return False
+    if not verify_password(user.password,password):
+        return False
+    return user
+
+def verify_password(user_password:str ,password: str):
+    if pwd_context.verify(password, user_password):
+        print("Password verified")
+        return True
+    print("Password not verified")
+    return False
+
+
+    
 
 
 
@@ -90,13 +87,24 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = timedel
     return encoded_jwt
 
 
-def verify_token(token: str = Depends(oauth2_scheme)):
+
+def get_token_from_cookie(request: Request):
+    print(request.headers) #prints nothing...
+    token = request.cookies.get('token')
+    print(f"Token from cookie: {token}")  # Print the token
+
+    if not token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    return token.replace("Bearer ", "")
+
+def verify_token(token: str = Depends(get_token_from_cookie)):
     try:
+        print(f"Token to verify: {token}")  # Print the token to verify
+
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
         roles: list = payload.get("roles")
         id: int = payload.get("id")
-        print("verify token roles: ",roles)
         if email is None:
             raise HTTPException(status_code=401, detail="Invalid token")
         return email,roles,id
@@ -105,17 +113,17 @@ def verify_token(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=401, detail="Invalid token")
     
 
-def get_token_roles(token_data: tuple = Depends(verify_token)):
+def get_roles_from_token(token_data: tuple = Depends(verify_token)):
     email, roles,id = token_data
     return roles
 
+def get_id_from_token(token_data: tuple = Depends(verify_token)):
+    email, roles,id = token_data
+    return id
 
-def admin_only(roles: list = Depends(get_token_roles)):
+def admin_only(roles: list = Depends(get_roles_from_token)):
     if "admin" in roles:
         print("Admin access granted")
     else:
         raise HTTPException(status_code=401, detail="Unauthorized access")
     
-def get_id_from_token(token_data: tuple = Depends(verify_token)):
-    email, roles,id = token_data
-    return id

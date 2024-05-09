@@ -14,6 +14,15 @@ def read_venues(db: Session = Depends(get_db)):
     venues = execute_query_and_handle_errors(lambda: db.query(Venue).all(), "Venues")
     return venues
 
+@router.get("/venues/{city}", response_model=list[VenueResponse])
+def read_venues_by_city(city: str, surface_type: str = None, db: Session = Depends(get_db)):
+    print("Reading venues from city:", city, "...")
+    if surface_type:
+        venues = execute_query_and_handle_errors(lambda: db.query(Venue).filter(Venue.venue_city == city).filter(Venue.surface_type == surface_type).all(), "Venues")
+    else:
+        venues = execute_query_and_handle_errors(lambda: db.query(Venue).filter(Venue.venue_city == city).all(), "Venues")
+    
+    return venues
 
 @router.get("/venues/{venue_id}", response_model=VenueResponse)
 def read_venue_by_id(venue_id: int, db: Session = Depends(get_db)):

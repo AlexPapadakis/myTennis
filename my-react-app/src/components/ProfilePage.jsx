@@ -8,12 +8,9 @@ function ProfilePage() {
     const [athlete, setAthlete] = useState();
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
-        const headers = { Authorization: `Bearer ${token}` };
-
         Promise.all([
-            axios.get("http://localhost:8000/users/me/", { headers }),
-            axios.get("http://localhost:8000/athletes/me/", { headers }) 
+            axios.get("http://localhost:8000/users/me/", {withCredentials: true}),
+            axios.get("http://localhost:8000/athletes/me/", { withCredentials: true}) 
         ]).then(([userResponse, athleteResponse]) => {
             setUser(userResponse.data);
             athleteResponse.data.height = Number(athleteResponse.data.height);

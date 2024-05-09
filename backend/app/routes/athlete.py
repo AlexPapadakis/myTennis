@@ -31,9 +31,8 @@ def create_athlete_me(athlete: AthleteCreate, current_user_id: int = Depends(get
 
 
 @router.put("/athletes/me", response_model=AthleteResponse)
-def update_athlete_me(athlete: AthleteUpdate, current_user: Tuple[str, List[str], int] = Depends(get_id_from_token), db: Session = Depends(get_db)):
-    _, _, user_id = current_user
-    db_athlete = execute_query_and_handle_errors(lambda: db.query(Athlete).filter(Athlete.user_id == user_id).first(), "Athlete")
+def update_athlete_me(athlete: AthleteUpdate, current_user_id = Depends(get_id_from_token), db: Session = Depends(get_db)):
+    db_athlete = execute_query_and_handle_errors(lambda: db.query(Athlete).filter(Athlete.user_id == current_user_id).first(), "Athlete")
     for attr, value in athlete.model_dump().items():
         if attr is not None and value is not None:
             setattr(db_athlete, attr, value)

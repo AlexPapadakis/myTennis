@@ -20,16 +20,13 @@ function EditableField({label, initialValue ,className,fieldName, type, options}
     };
 
     const handleSaveClick = () => {
-        const token = localStorage.getItem('token');
         
 
         if (className === "user") {
             axios.put(`http://localhost:8000/users/me`, {
                 [fieldName]: value
             }, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
+                withCredentials: true
             })
             .then(response => {
                 console.log(response.data);
@@ -41,9 +38,7 @@ function EditableField({label, initialValue ,className,fieldName, type, options}
             axios.put(`http://localhost:8000/athletes/me`, {
                 [fieldName]: value
             }, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
+                withCredentials: true
             })
             .then(response => {
                 console.log(response.data);
@@ -82,7 +77,7 @@ function EditableField({label, initialValue ,className,fieldName, type, options}
                         {label}
                     </label>
                     {renderInput()}
-                    <button onClick={handleAbortClick}>Abort</button>
+                    <button onClick={handleAbortClick}>X</button>
                     <button onClick={handleSaveClick}>Save</button>
                 </div>
             ) : (

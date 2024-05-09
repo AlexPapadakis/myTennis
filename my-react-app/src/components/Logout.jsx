@@ -5,7 +5,6 @@ function Logout({onLogout}) {
     const navigate = useNavigate();
 
     useEffect(() => {
-        localStorage.removeItem('token'); // remove the token from local storage
         onLogout(); // call the onLogout function passed as a prop
         navigate('/login'); // redirect the user to the login page
     }, [navigate]);
