@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import UserProfileCard from "./UserProfileCard";
-import AthleteCard from "./AthleteCard";
+import AthleteCard from "../athlete/AthleteCard";
 import axios from  "axios";
 
 function ProfilePage() {

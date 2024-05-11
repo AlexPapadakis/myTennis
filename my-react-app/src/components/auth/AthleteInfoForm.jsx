@@ -1,12 +1,15 @@
 
-import React, { useState } from 'react';
+import React, { useState ,useContext} from 'react';
 import axios from 'axios';
+import UserContext from '../UserContext';
 
-function AthleteInfoForm({ onAthleteInfoSubmit}) {
+function AthleteInfoForm() {
     const [handedness, setHandedness] = useState('');
     const [height, setHeight] = useState('');
     const [backhand_type, setBackhandType] = useState('');
     const [skill_level, setSkillLevel] = useState('');
+
+    const { state, dispatch } = useContext(UserContext);
 
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -22,7 +25,7 @@ function AthleteInfoForm({ onAthleteInfoSubmit}) {
             }
         ).then((response) => {
             console.log(response.data);
-            onAthleteInfoSubmit();
+            dispatch({ type: 'ATHLETE_SUBMIT' });
         }
         ).catch((error) => {
             console.log(error);

@@ -1,22 +1,19 @@
-import React , {useState}from 'react';
+import React , {useState, useContext}from 'react';
 import axios from 'axios';
-import VenuesList from './VenuesList';
-
-import { useContext } from 'react';
-import UserContext from './UserContext';
-
 import { useParams } from 'react-router-dom';
 
+import UserContext from '../UserContext';
+import VenuesList from '../venue/VenuesList';
 
 const MatchInvitationForm = ( ) => {
     const [scheduledDate, setScheduledDate] = useState('');
     const [scheduledTime, setScheduledTime] = useState('');
     const [selectedVenueId, setSelectedVenueId] = useState('');
     
-
     const { athleteId } = useParams();
 
-    const { city,userId } = useContext(UserContext);
+    const { state } = useContext(UserContext);
+    const { userId } = state;
     
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -60,7 +57,7 @@ const MatchInvitationForm = ( ) => {
             <label>
                 Venue:
 
-                <VenuesList city={city} onVenueSelect={setSelectedVenueId} selectedVenueId={selectedVenueId} />
+                <VenuesList onVenueSelect={setSelectedVenueId} />
                 
             </label>
             <br />

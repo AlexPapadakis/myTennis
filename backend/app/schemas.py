@@ -32,7 +32,6 @@ class Athlete(Base):
     user_id = Column(Integer,  ForeignKey('User.id'), primary_key=True)
     handedness = Column(String(20))
     height = Column(DECIMAL(5, 2))
-    weight = Column(DECIMAL(5, 2))
     backhand_type = Column(String(20))
     skill_level = Column(String(20))
     points = Column(Integer)

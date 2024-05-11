@@ -14,7 +14,7 @@ def read_venues(db: Session = Depends(get_db)):
     venues = execute_query_and_handle_errors(lambda: db.query(Venue).all(), "Venues")
     return venues
 
-@router.get("/venues/{city}", response_model=list[VenueResponse])
+@router.get("/venues/city/{city}", response_model=list[VenueResponse])
 def read_venues_by_city(city: str, surface_type: str = None, db: Session = Depends(get_db)):
     print("Reading venues from city:", city, "...")
     if surface_type:

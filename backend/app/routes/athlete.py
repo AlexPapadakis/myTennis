@@ -41,11 +41,11 @@ def update_athlete_me(athlete: AthleteUpdate, current_user_id = Depends(get_id_f
     print("Athlete updated successfully.")
     return db_athlete
 
-
-#, dependencies=[Depends(admin_only)]
-@router.get("/athletes/", response_model=list[AthleteResponse])
-def read_athletes(db: Session = Depends(get_db), city: Optional[str] = None ,gender:Optional[str]=None, skill_level: Optional[str] = None):
-    query = db.query(Athlete).join(User).filter(Athlete.user_id == User.id)
+@router.get("/athletesInCity/", response_model=list[AthleteResponse])
+def read_athletes(current_user_id = Depends(get_id_from_token), db: Session = Depends(get_db)
+                  , city: Optional[str] = None ,gender:Optional[str]=None, skill_level: Optional[str] = None):
+    
+    query = db.query(Athlete).join(User).filter(Athlete.user_id == User.id, User.id != current_user_id)
     if city:
         print("Reading athletes from city: ", city, "...")
         query = query.filter(User.city == city)
@@ -54,10 +54,17 @@ def read_athletes(db: Session = Depends(get_db), city: Optional[str] = None ,gen
         query = query.filter(Athlete.skill_level == skill_level)
     if gender:
         print("Reading athletes with gender: ",gender,"...")
-        query = query.filter(User.gender==gender)
+        query = query.filter(User.gender == gender)
+        
+    athletesInCity = execute_query_and_handle_errors(lambda: query.all(), "Athletes")
+    return athletesInCity
 
-        
-        
+
+
+
+@router.get("/athletes/", response_model=list[AthleteResponse], dependencies=[Depends(admin_only)])
+def read_athletes(db: Session = Depends(get_db)):
+    query = db.query(Athlete).join(User).filter(Athlete.user_id == User.id)
     athletes = execute_query_and_handle_errors(lambda: query.all(), "Athletes")
     return athletes
 

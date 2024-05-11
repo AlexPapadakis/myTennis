@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useContext} from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 
-function LoginForm  ({ onLogin }) {
+import { UserContext } from '../UserContext';
 
-    const navigate = useNavigate();
+
+function LoginForm  () {
+    const {dispatch} = useContext(UserContext);
+
+
     const handleSubmit = (e) => {
         e.preventDefault();
         const email = e.target.email.value;
@@ -16,10 +19,8 @@ function LoginForm  ({ onLogin }) {
         }, {
             withCredentials: true
         }).then((response) => {
-            // localStorage.setItem('token', response.data.access_token);
             console.log(response.data);
-            onLogin(); // call the function passed as a prop
-            navigate('/');
+            dispatch({ type: 'LOGIN' }); // Dispatch a 'LOGIN' action
         }).catch((error) => {
             console.error(error);
         });

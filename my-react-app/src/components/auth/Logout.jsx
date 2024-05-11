@@ -1,11 +1,16 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-function Logout({onLogout}) {
+import { useContext } from 'react';
+import UserContext from '../UserContext';
+
+function Logout() {
     const navigate = useNavigate();
 
+
+    const { dispatch } = useContext(UserContext);
     useEffect(() => {
-        onLogout(); // call the onLogout function passed as a prop
+        dispatch({ type: 'LOGOUT' }); 
         navigate('/login'); // redirect the user to the login page
     }, [navigate]);
 

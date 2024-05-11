@@ -1,23 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import ProfileCard from './ProfileCard';
+import ProfileCard from '../profile/ProfileCard';
 import axios from 'axios';
 
 import { useNavigate } from 'react-router-dom';
-import { useContext ,createContext} from 'react';
+import { useContext } from 'react';
 
-import UserContext from './UserContext';
+import UserContext from '../UserContext';
 
 
 const AthletesInCity = () => {
     const [athletes, setAthletes] = useState([]);
     const [skillLevelFilter, setSkillLevelFilter] = useState('');
 
-    const { city } = useContext(UserContext);
+    const { state, dispatch } = useContext(UserContext);
 
+    const city = state.city;
     const navigate = useNavigate()
 
-    useEffect(() => {
-        axios.get(`http://localhost:8000/athletes?city=${city}`, {
+    useEffect(() => {     
+        axios.get(`http://localhost:8000/athletesInCity?city=${city}`, {
             withCredentials: true
         }).then((response) => {
             setAthletes(response.data);
@@ -27,13 +28,9 @@ const AthletesInCity = () => {
     }, [city]);
 
 
-   
     const handleInviteClick = (athleteId) => {
         navigate(`/matchInvitationForm/${athleteId}`);
         };
-    
-
-       
 
     const handleSkillLevelFilterChange = (event) => {
         setSkillLevelFilter(event.target.value);
