@@ -72,45 +72,6 @@ const App = () => {
   }
 
 
-  const checkUserDataComplete = (data) => 
-    data.city !== null && data.username !== null && data.real_name !== null;
-  
-  const checkAthleteDataComplete = (data) => 
-    data.height !== null && data.handedness !== null && data.backhand_type !== null && data.skill_level !== null;
-  
-
- 
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (state.isLoggedIn) {
-        try {
-          const userResponse = await axios.get('http://localhost:8000/users/me/', { withCredentials: true });
-          const athleteResponse = await axios.get('http://localhost:8000/athletes/me/', { withCredentials: true });
-
-          dispatch({
-            type: 'SET_USER_DATA',
-            payload: {
-              userId: userResponse.data.id,
-              completedSignUp: checkUserDataComplete(userResponse.data),
-              city: userResponse.data.city,
-              isAthlete: checkAthleteDataComplete(athleteResponse.data),
-            },
-          });
-        } catch (error) {
-          if (error.response && error.response.status === 401) {
-            dispatch({ type: 'LOGOUT' });
-          } else {
-            console.error(error);
-          }
-        }
-      }
-    };
-
-    fetchData();
-  }, [state.isLoggedIn]);
-
-
   return (
 
     <Router>

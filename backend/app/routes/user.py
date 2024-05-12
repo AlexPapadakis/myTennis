@@ -5,7 +5,7 @@ from ..schemas import User
 from ..database import get_db
 from ..models import UserCreate,UserResponse,UserUpdate
 
-from .auth import admin_only,verify_token
+from .auth import admin_only,get_id_from_token
 
 
 from .error_handler import execute_query_and_handle_errors
@@ -16,15 +16,13 @@ router = APIRouter()
 
 
 @router.get("/users/me", response_model=UserResponse)
-def read_users_me(current_user: Tuple[str, List[str], int] = Depends(verify_token), db: Session = Depends(get_db)):
-    _, _, user_id = current_user
-    user = execute_query_and_handle_errors(lambda: db.query(User).filter(User.id == user_id).first(), "User")
+def read_users_me(current_user_id: int = Depends(get_id_from_token), db: Session = Depends(get_db)):
+    user = execute_query_and_handle_errors(lambda: db.query(User).filter(User.id == current_user_id).first(), "User")
     return user
 
 @router.put("/users/me" , response_model=UserResponse)
-def update_user_me(user: UserUpdate, current_user: Tuple[str, List[str], int] = Depends(verify_token), db: Session = Depends(get_db)):
-    _, _, user_id = current_user
-    db_user = execute_query_and_handle_errors(lambda: db.query(User).filter(User.id == user_id).first(), "User")
+def update_user_me(user: UserUpdate, current_user_id: int = Depends(get_id_from_token), db: Session = Depends(get_db)):
+    db_user = execute_query_and_handle_errors(lambda: db.query(User).filter(User.id == current_user_id).first(), "User")
     for attr, value in user.model_dump().items():
         if attr is not None and value is not None:
             print(attr, value)
@@ -32,7 +30,7 @@ def update_user_me(user: UserUpdate, current_user: Tuple[str, List[str], int] = 
     db.commit()
     db.refresh(db_user)
     
-    print("User with id: ", user_id, " updated successfully.")
+    print("User with id: ", current_user_id, " updated successfully.")
     
     return db_user
 

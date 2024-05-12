@@ -52,11 +52,14 @@ def login_for_access_token(login_data: UserLogIn , db: Session = Depends(get_db)
     response = JSONResponse(content={"user_id": user.id})
 
     print("Setting cookie")
-    response.set_cookie(key="token", value=f"Bearer {access_token}", secure=False, httponly=True,samesite='Lax')
+    response.set_cookie(key="access_token", value=f"Bearer {access_token}", secure=False, httponly=True,samesite='Lax')
     
     return response
 
-
+@router.post('/logout')
+def logout(response: Response):
+    response.delete_cookie(key="access_token", secure=False, httponly=True, samesite='Lax')
+    return {"message": "You have been logged out."}
 
 
 def authenticate_user(email: EmailStr, password: str, db: Session):
@@ -90,7 +93,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = timedel
 
 def get_token_from_cookie(request: Request):
     print(request.headers) #prints nothing...
-    token = request.cookies.get('token')
+    token = request.cookies.get('access_token')
     print(f"Token from cookie: {token}")  # Print the token
 
     if not token:
@@ -109,7 +112,8 @@ def verify_token(token: str = Depends(get_token_from_cookie)):
             raise HTTPException(status_code=401, detail="Invalid token")
         return email,roles,id
     
-    except JWTError:
+    except JWTError as e:
+        print(f"Error: {e}")
         raise HTTPException(status_code=401, detail="Invalid token")
     
 

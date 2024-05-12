@@ -41,6 +41,10 @@ function AthleteInfoForm() {
             <h1>Fill in your athlete information</h1>
             <form onSubmit={handleSubmit}>
                 <label>
+                    Height(in cm):
+                    <input value={height} onChange={(e) => setHeight(e.target.value)} />
+                </label>
+                <label>
                     Handedness:
                     <select value={handedness} onChange={(e) => setHandedness(e.target.value)}>
                         <option value="">Select</option>
@@ -49,10 +53,6 @@ function AthleteInfoForm() {
                     </select>
                 </label>
                 <br />
-                <label>
-                    Height(in cm):
-                    <input value={height} onChange={(e) => setHeight(e.target.value)} />
-                </label>
                 <br />
                 <label>
                     Backhand Type:

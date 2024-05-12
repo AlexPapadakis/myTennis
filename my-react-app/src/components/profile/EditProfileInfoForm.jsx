@@ -12,9 +12,9 @@ const userFields = [
     { label: "Gender", fieldName: "gender" ,type: "select",options: ['Male','Female','Other']},
     { label: "Phone", fieldName: "phone" },
     { label: "City", fieldName: "city" ,type:"select",options:["Thessaloniki"]},
+    { label:"Address",fieldName:"address" },
     { label: "Postal Code", fieldName: "postal_code" },
-    { label: "Birthday", fieldName: "birthday",type:"date"
-    },
+    { label: "Birthday", fieldName: "birthday",type:"date"}
 ];
 
 const athleteFields = [
