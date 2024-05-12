@@ -1,6 +1,7 @@
 import React,{useState} from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { ALL_USERS_API_URL } from '../../constants';
 
 function BasicSignUpForm(){
     const [errors, setErrors] = useState({});
@@ -25,7 +26,7 @@ function BasicSignUpForm(){
         if (Object.keys(errors).length > 0) {
             setErrors(errors);
         } else {
-            const response = await axios.post('http://localhost:8000/users', {
+            const response = await axios.post(ALL_USERS_API_URL, {
             email,
             password
             });

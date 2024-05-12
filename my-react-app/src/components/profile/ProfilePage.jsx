@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import UserProfileCard from "./UserProfileCard";
 import AthleteCard from "../athlete/AthleteCard";
 import axios from  "axios";
+import { CURRENT_ATHLETE_API_URL, CURRENT_USER_API_URL } from "../../constants";
 
 function ProfilePage() {
     const [user, setUser] = useState();
@@ -9,8 +10,8 @@ function ProfilePage() {
 
     useEffect(() => {
         Promise.all([
-            axios.get("http://localhost:8000/users/me/", {withCredentials: true}),
-            axios.get("http://localhost:8000/athletes/me/", { withCredentials: true}) 
+            axios.get(CURRENT_USER_API_URL, {withCredentials: true}),
+            axios.get(CURRENT_ATHLETE_API_URL, { withCredentials: true}) 
         ]).then(([userResponse, athleteResponse]) => {
             setUser(userResponse.data);
             athleteResponse.data.height = Number(athleteResponse.data.height);

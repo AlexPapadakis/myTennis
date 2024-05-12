@@ -2,6 +2,7 @@ import React, { useState,useContext } from 'react';
 import axios from 'axios';
 import { KJUR } from 'jsrsasign';
 import UserContext from '../UserContext';
+import { CURRENT_USER_API_URL } from '../../constants';
 
 function CompleteSignUpForm({ }) {
 
@@ -14,7 +15,7 @@ function CompleteSignUpForm({ }) {
         const real_name = e.target.realname.value;
 
         if(city && real_name && username){
-        const response = await axios.put(`http://localhost:8000/users/me`, 
+        const response = await axios.put(CURRENT_USER_API_URL, 
             {
                 city,
                 real_name,

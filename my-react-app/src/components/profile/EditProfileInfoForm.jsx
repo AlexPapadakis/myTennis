@@ -3,6 +3,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 
 import EditableField from "../shared/EditableField";
+import { CURRENT_ATHLETE_API_URL, CURRENT_USER_API_URL } from "../../constants";
 
 
 const userFields = [
@@ -33,10 +34,10 @@ function EditProfileInfoForm() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const userResponse = await axios.get("http://localhost:8000/users/me/", { withCredentials: true });
+        const userResponse = await axios.get(CURRENT_USER_API_URL, { withCredentials: true });
         setUser(userResponse.data);
 
-        const athleteResponse = await axios.get("http://localhost:8000/athletes/me/", { withCredentials: true });
+        const athleteResponse = await axios.get(CURRENT_ATHLETE_API_URL, { withCredentials: true });
         setAthlete(athleteResponse.data);
       } catch (error) {
         if (error.response && error.response.status === 404) {

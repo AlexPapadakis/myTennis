@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 
 import UserContext from '../UserContext';
 import VenuesList from '../venue/VenuesList';
+import { MATCH_INVITATION_API_URL } from '../../constants';
 
 const MatchInvitationForm = ( ) => {
     const [scheduledDate, setScheduledDate] = useState('');
@@ -18,7 +19,7 @@ const MatchInvitationForm = ( ) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         
-        axios.post('http://localhost:8000/matchInvitations', {
+        axios.post(MATCH_INVITATION_API_URL, {
             sender_id: userId,
             recipient_id: athleteId,
             scheduled_date: scheduledDate,

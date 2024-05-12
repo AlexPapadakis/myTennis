@@ -2,6 +2,7 @@ import React, { useContext} from 'react';
 import axios from 'axios';
 
 import { UserContext } from '../UserContext';
+import { AUTH_TOKEN_URL } from '../../constants';
 
 
 function LoginForm  () {
@@ -13,7 +14,7 @@ function LoginForm  () {
         const email = e.target.email.value;
         const password = e.target.password.value;
 
-        axios.post('http://localhost:8000/token', {
+        axios.post(AUTH_TOKEN_URL, {
             email,
             password
         }, {

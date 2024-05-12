@@ -3,13 +3,13 @@ from sqlalchemy.orm import Session
 from ..schemas import MatchInvitation
 from ..database import get_db
 from ..models import MatchInvitationCreate, MatchInvitationResponse, MatchInvitationUpdate
-from .auth import admin_only
+from ..services.auth_service import check_admin_role
 from .error_handler import execute_query_and_handle_errors
 
 router = APIRouter()
 
 
-@router.get("/matchInvitations", response_model=list[MatchInvitationResponse], dependencies=[Depends(admin_only)])
+@router.get("/matchInvitations", response_model=list[MatchInvitationResponse], dependencies=[Depends(check_admin_role)])
 def read_match_invitations(db: Session = Depends(get_db)):
     match_invitations = execute_query_and_handle_errors(lambda: db.query(MatchInvitation).all(), "Match Invitations")
     return match_invitations
@@ -51,7 +51,7 @@ def update_match_invitation(match_invitation_id: int, match_invitation: MatchInv
     return db_match_invitation
 
 
-@router.delete("/matchInvitations/{match_invitation_id}", dependencies=[Depends(admin_only)])
+@router.delete("/matchInvitations/{match_invitation_id}", dependencies=[Depends(check_admin_role)])
 def delete_match_invitation(match_invitation_id: int, db: Session = Depends(get_db)):
     print("Deleting match invitation with id: ", match_invitation_id, "...")
     db_match_invitation = execute_query_and_handle_errors(

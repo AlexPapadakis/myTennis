@@ -1,7 +1,7 @@
 import datetime
 from decimal import Decimal
 import time
-from pydantic import BaseModel, constr, EmailStr, Field, validator
+from pydantic import BaseModel, constr, EmailStr, Field, validator,field_validator
 from datetime import date
 from typing import Optional
 from pydantic import condecimal,root_validator
@@ -42,7 +42,7 @@ class UserWithValidatorsBase(UserBase, ABC):
             values['password'] = _pwd_context.hash(password)
         return values
 
-    @validator('gender')
+    @field_validator('gender')
     def validate_gender(cls, value):
         print(f"Validating gender: {value}")
         valid_genders = ['Male', 'Female', 'Other']
@@ -81,21 +81,21 @@ class AthleteBase(BaseModel,ABC):
         orm_mode = True
         
 class AthleteWithValidators(AthleteBase,ABC):
-    @validator('handedness')
+    @field_validator('handedness')
     def validate_handedness(cls, value):
         valid_handedness = ['Right-handed', 'Left-handed']
         if value is not None and value not in valid_handedness:
             raise ValueError(f'Invalid handedness. Must be one of: {", ".join(valid_handedness)}')
         return value
     
-    @validator('backhand_type')
+    @field_validator('backhand_type')
     def validate_backhand_type(cls, value):
         valid_backhand_types = ['One-handed', 'Two-handed']
         if value is not None and value not in valid_backhand_types:
             raise ValueError(f'Invalid backhand type. Must be one of: {", ".join(valid_backhand_types)}')
         return value
     
-    @validator('skill_level')
+    @field_validator('skill_level')
     def validate_skill_level(cls, value):
         valid_skill_levels = ['Beginner', 'Intermediate', 'Advanced']
         if value is not None and value not in valid_skill_levels:
@@ -128,7 +128,7 @@ class VenueBase(BaseModel,ABC):
     class Config:
         orm_mode = True
 class VenueWithValidators(VenueBase,ABC):
-    @validator('surface_type')
+    @field_validator('surface_type')
     def validate_surface_type(cls, value):
         valid_surface_types = ['Hard', 'Grass', 'Clay']
         if value not in valid_surface_types:
@@ -161,7 +161,7 @@ class MatchBase(BaseModel,ABC):
         orm_mode = True
         
 class MatchWithValidators(MatchBase,ABC):
-    @validator('match_date')
+    @field_validator('match_date')
     def validate_date(cls, value):
         if value is not None and value < date.today():
             raise ValueError('Match date must be in the future')
@@ -177,12 +177,12 @@ class MatchWithValidators(MatchBase,ABC):
 class MatchCreate(MatchWithValidators):
     state: str = 'Upcoming'
 
-    @validator('state')
+    @field_validator('state')
     def validate_state(cls, v):
         return "Upcoming"
     
 class MatchUpdate(MatchWithValidators):
-    @validator('state')
+    @field_validator('state')
     def validate_state(cls, value):
         valid_states = ['Upcoming', 'Completed']
         if value is not None and value not in valid_states:
@@ -206,13 +206,13 @@ class TournamentBase(BaseModel,ABC):
 
 
 class TournamentWithValidators(TournamentBase,ABC):
-    @validator('start_date')
+    @field_validator('start_date')
     def validate_start_date(cls, value):
         if value is not None and value < date.today():
             raise ValueError('Start date must be in the future')
         return value
     
-    @validator('end_date')
+    @field_validator('end_date')
     def validate_end_date(cls, value, values):
         if value is not None and value < values['start_date']:
             raise ValueError('End date must be after start date')
@@ -220,13 +220,13 @@ class TournamentWithValidators(TournamentBase,ABC):
 
 class TournamentCreate(TournamentWithValidators):
     state: str = 'Upcoming' 
-    @validator('state')
+    @field_validator('state')
     def validate_state(cls, v):
         return "Upcoming"
 
 
 class TournamentUpdate(TournamentWithValidators):
-    @validator('state')
+    @field_validator('state')
     def validate_state(cls, value):
         valid_states = ['Upcoming', 'In Progress', 'Completed']
         if value is not None and value not in valid_states:
@@ -255,7 +255,7 @@ class MatchInvitationBase(BaseModel,ABC):
         orm_mode = True
         
 class MatchInvitationWithValidators(MatchInvitationBase,ABC):
-    @validator('status')
+    @field_validator('status')
     def validate_status(cls, value):
         valid_statuses = ['Pending', 'Accepted', 'Completed']
         if value is not None and value not in valid_statuses:
@@ -297,12 +297,12 @@ class MatchScoreBase(BaseModel,ABC):
         orm_mode = True
         
 class MatchScoreWithValidators(MatchScoreBase,ABC):
-    @validator('set_number')
+    @field_validator('set_number')
     def validate_set_number(cls, value):
         if value is not None and value > MAX_SETS_PER_MATCH:
             raise ValueError('Set number must not be greater than {MAX_SETS_PER_MATCH}')
         return value
-    @validator('games_won')
+    @field_validator('games_won')
     def validate_games_won(cls, value):
         if value is not None and value > MAX_GAMES_PER_SET:
             raise ValueError('Games won must be less or equal than {MAX_GAMES_PER_SET}')

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from ..schemas import Athlete,User
 from ..database import get_db
 from ..models import AthleteCreate,AthleteResponse,AthleteUpdate,UserResponse
-from .auth import admin_only,get_id_from_token
+from ..services.auth_service import check_admin_role,get_id_from_token
 from typing import List,Tuple, Optional
 from .error_handler import execute_query_and_handle_errors
 
@@ -62,7 +62,7 @@ def read_athletes(current_user_id = Depends(get_id_from_token), db: Session = De
 
 
 
-@router.get("/athletes/", response_model=list[AthleteResponse], dependencies=[Depends(admin_only)])
+@router.get("/athletes/", response_model=list[AthleteResponse], dependencies=[Depends(check_admin_role)])
 def read_athletes(db: Session = Depends(get_db)):
     query = db.query(Athlete).join(User).filter(Athlete.user_id == User.id)
     athletes = execute_query_and_handle_errors(lambda: query.all(), "Athletes")

@@ -3,13 +3,13 @@ from sqlalchemy.orm import Session
 from ..schemas import Venue
 from ..models import VenueCreate, VenueResponse, VenueUpdate
 from ..database import get_db
-from .auth import admin_only
+from ..services.auth_service import check_admin_role 
 from .error_handler import execute_query_and_handle_errors
 
 router = APIRouter()
 
 
-@router.get("/venues", response_model=list[VenueResponse], dependencies=[Depends(admin_only)])
+@router.get("/venues", response_model=list[VenueResponse], dependencies=[Depends(check_admin_role)])
 def read_venues(db: Session = Depends(get_db)):
     venues = execute_query_and_handle_errors(lambda: db.query(Venue).all(), "Venues")
     return venues
@@ -54,7 +54,7 @@ def update_venue(venue_id: int, venue: VenueUpdate, db: Session = Depends(get_db
     return db_venue
 
 
-@router.delete("/venues/{venue_id}", dependencies=[Depends(admin_only)])
+@router.delete("/venues/{venue_id}", dependencies=[Depends(check_admin_role)])
 def delete_venue(venue_id: int, db: Session = Depends(get_db)):
     print("Deleting venue with id:", venue_id, "...")
     db_venue = execute_query_and_handle_errors(lambda: db.query(Venue).filter(Venue.venue_id == venue_id).first(), "Venue")

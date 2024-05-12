@@ -1,5 +1,6 @@
 import React, { useReducer ,useEffect} from 'react';
 import axios from 'axios';
+import { CURRENT_USER_API_URL, CURRENT_ATHLETE_API_URL } from '../constants';
 
 const UserContext = React.createContext();
 
@@ -42,8 +43,8 @@ const UserProvider = ({ children }) => {
   useEffect(() => {
     const fetchData = async () => {
         try {
-          const userResponse = await axios.get('http://localhost:8000/users/me/', { withCredentials: true });
-          const athleteResponse = await axios.get('http://localhost:8000/athletes/me/', { withCredentials: true });
+          const userResponse = await axios.get(CURRENT_USER_API_URL, { withCredentials: true });
+          const athleteResponse = await axios.get(CURRENT_ATHLETE_API_URL, { withCredentials: true });
 
           dispatch({
             type: 'SET_USER_DATA',
@@ -65,7 +66,7 @@ const UserProvider = ({ children }) => {
     };
 
     fetchData();
-  }, [isLoggedIn,isAthlete, completedSignUp, city, userId]);
+  }, [isLoggedIn,isAthlete,completedSignUp]);
 
 
     return (

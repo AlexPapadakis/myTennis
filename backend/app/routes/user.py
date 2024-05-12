@@ -1,13 +1,11 @@
 from typing import List, Tuple
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+
 from ..schemas import User
 from ..database import get_db
 from ..models import UserCreate,UserResponse,UserUpdate
-
-from .auth import admin_only,get_id_from_token
-
-
+from ..services.auth_service import check_admin_role, extract_token_data, get_id_from_token
 from .error_handler import execute_query_and_handle_errors
 
 
@@ -37,7 +35,7 @@ def update_user_me(user: UserUpdate, current_user_id: int = Depends(get_id_from_
 
 
 
-@router.get("/users/", response_model=list[UserResponse],dependencies =[Depends(admin_only)])
+@router.get("/users/", response_model=list[UserResponse],dependencies =[Depends(check_admin_role)])
 def read_users(db: Session = Depends(get_db)): 
     users = execute_query_and_handle_errors(lambda: db.query(User).all(), "Users")
     return users
@@ -75,7 +73,7 @@ def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
     return db_user
 
 
-@router.delete("/users/{user_id}",dependencies=[Depends(admin_only)])
+@router.delete("/users/{user_id}",dependencies=[Depends(check_admin_role)])
 def delete_user(user_id: int, db: Session = Depends(get_db)):
     print("Deleting user with id: ", user_id, "...")
     db_user = execute_query_and_handle_errors(lambda: db.query(User).filter(User.id == user_id).first(), "User")

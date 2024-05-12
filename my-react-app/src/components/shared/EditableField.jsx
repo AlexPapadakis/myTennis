@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { CURRENT_ATHLETE_API_URL, CURRENT_USER_API_URL } from '../../constants';
 
 function EditableField({label, initialValue ,className,fieldName, type, options}) {
     const [value, setValue] = useState(initialValue);
@@ -23,7 +24,7 @@ function EditableField({label, initialValue ,className,fieldName, type, options}
         
 
         if (className === "user") {
-            axios.put(`http://localhost:8000/users/me`, {
+            axios.put(CURRENT_USER_API_URL, {
                 [fieldName]: value
             }, {
                 withCredentials: true
@@ -35,7 +36,7 @@ function EditableField({label, initialValue ,className,fieldName, type, options}
                 console.log(error);
             });
         } else {
-            axios.put(`http://localhost:8000/athletes/me`, {
+            axios.put(CURRENT_ATHLETE_API_URL, {
                 [fieldName]: value
             }, {
                 withCredentials: true

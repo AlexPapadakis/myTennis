@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.schemas import Match
 from app.models import MatchCreate, MatchUpdate, MatchResponse
-from app.routes.auth import verify_token, admin_only
 from app.routes.error_handler import execute_query_and_handle_errors
 
 router = APIRouter()

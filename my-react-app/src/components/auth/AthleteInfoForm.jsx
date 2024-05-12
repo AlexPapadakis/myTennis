@@ -2,6 +2,7 @@
 import React, { useState ,useContext} from 'react';
 import axios from 'axios';
 import UserContext from '../UserContext';
+import { CURRENT_ATHLETE_API_URL } from '../../constants';
 
 function AthleteInfoForm() {
     const [handedness, setHandedness] = useState('');
@@ -14,7 +15,7 @@ function AthleteInfoForm() {
     const handleSubmit = (event) => {
         event.preventDefault();
         console.log(handedness, height, backhand_type, skill_level);
-        axios.post('http://localhost:8000/athletes/me', {
+        axios.post(CURRENT_ATHLETE_API_URL, {
             handedness,
             height,
             backhand_type,
