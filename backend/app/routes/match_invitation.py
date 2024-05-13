@@ -3,10 +3,25 @@ from sqlalchemy.orm import Session
 from ..schemas import MatchInvitation
 from ..database import get_db
 from ..models import MatchInvitationCreate, MatchInvitationResponse, MatchInvitationUpdate
-from ..services.auth_service import check_admin_role
+from ..services.auth_service import check_admin_role, get_id_from_token
 from .error_handler import execute_query_and_handle_errors
 
+
 router = APIRouter()
+
+
+
+
+@router.get("/matchInvitations/me", response_model=list[MatchInvitationResponse])
+def read_match_invitations(current_user_id: int = Depends(get_id_from_token), db: Session = Depends(get_db)):
+    match_invitations = execute_query_and_handle_errors(
+        lambda: db.query(MatchInvitation).filter(
+            (MatchInvitation.recipient_id == current_user_id) | (MatchInvitation.sender_id == current_user_id)
+        ).all(),
+        "Match Invitations"
+    )
+    return match_invitations
+
 
 
 @router.get("/matchInvitations", response_model=list[MatchInvitationResponse], dependencies=[Depends(check_admin_role)])

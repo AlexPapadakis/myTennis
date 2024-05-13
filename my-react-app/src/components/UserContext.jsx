@@ -49,7 +49,6 @@ const UserProvider = ({ children }) => {
           dispatch({
             type: 'SET_USER_DATA',
             payload: {
-              isLoggedIn: true,
               userId: userResponse.data.id,
               completedSignUp: checkUserDataComplete(userResponse.data),
               city: userResponse.data.city,

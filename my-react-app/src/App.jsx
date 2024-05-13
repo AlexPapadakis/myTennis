@@ -16,6 +16,7 @@ import Logout from './components/auth/Logout.jsx'
 import AthletesInCity from './components/athlete/AthletesInCity.jsx';
 import MatchInvitationForm from './components/match/MatchInvitationForm.jsx';
 
+import MatchInvitationList from './components/match/MatchInvitationList.jsx';
 
 
 import  UserContext  from './components/UserContext'; 
@@ -44,6 +45,9 @@ const App = () => {
           links.push(
             <li key="findPlayers"><Link to="/findPlayers">Find Players</Link></li>
           );
+          links.push(
+            <li key="matchInvitations"><Link to="/matchInvitations">Match Invitations</Link></li>
+          )
         } else {
           links.push(
             <li key="athleteInfoForm"><Link to="/athleteInfoForm">Set up your athlete profile</Link></li>
@@ -93,6 +97,7 @@ const App = () => {
               <Route path="/logout" element={<Logout />} />
               <Route path="/findPlayers" element={<AthletesInCity />} />
               <Route path="/matchInvitationForm/:athleteId" element={<MatchInvitationForm />} />
+              <Route path="/matchInvitations" element={<MatchInvitationList />} />
             </Routes>
         </ul>
       </nav>
