@@ -17,3 +17,5 @@ export const VENUE_API_URL = `${BASE_URL}/venues/`;
 export const MATCH_INVITATION_API_URL = `${BASE_URL}/matchInvitations/`;
 
 export const MY_MATCH_INVITATIONS_API_URL = `${BASE_URL}/matchInvitations/me/`;
+
+export const MATCH_API_URL = `${BASE_URL}/matches/`;

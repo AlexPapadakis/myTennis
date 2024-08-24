@@ -1,0 +1,38 @@
+.my-modal {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+    color-scheme: light dark;
+    color: rgba(0, 0, 0, 0.87);
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    position: absolute;
+    inset: 40px;
+    border: 1px solid rgb(204, 204, 204);
+    background: rgb(177, 177, 177);
+    overflow: auto;
+    border-radius: 4px;
+    outline: none;
+    padding: 20px;
+
+      /* Use Flexbox for centering and content hugging */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    /* Remove fixed positioning and sizing */
+    position: relative;
+    inset: auto;
+    
+    /* Add automatic margins to center the modal on the page */
+    margin: auto;
+    
+    /* Set the width and height to fit the content */
+    width: fit-content;
+    height: fit-content;
+
+  
+
+
+  }

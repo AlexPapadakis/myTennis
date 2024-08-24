@@ -1,13 +1,61 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { MATCH_INVITATION_API_URL,USER_API_URL, VENUE_API_URL } from '../../constants';
+import Modal from 'react-modal';
+import ProfileCard from '../profile/ProfileCard';
+import VenueCard from '../venue/VenueCard';
+import { ATHLETE_API_URL, MATCH_API_URL,MATCH_INVITATION_API_URL,USER_API_URL, VENUE_API_URL } from '../../constants';
 
-const InvitationSender = ({ senderId, senderName }) => (
-  <p>
-    Invitation from <Link to={`/profile/${senderId}`}>{senderName}</Link>
-  </p>
-);
+import './ModalStyles.css';
+
+const fetchAthlete = async (athleteId) => {
+  try {
+    const response = await axios.get(`${ATHLETE_API_URL}${athleteId}`, { withCredentials: true });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
+Modal.setAppElement('#root'); // This line is needed for accessibility reasons
+
+
+const InvitationSender = ({ senderId, senderName }) => {
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [athlete, setAthlete] = useState(null);
+  
+
+  const openModal = async () => {
+    const fetchedAthlete = await fetchAthlete(senderId);
+    setAthlete(fetchedAthlete);
+    console.log(fetchedAthlete)
+    setModalIsOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalIsOpen(false);
+  };
+
+  return (
+    <p>
+      Invitation from <Link onClick={openModal}>{senderName}</Link>
+
+      <Modal
+        isOpen={modalIsOpen}
+        onRequestClose={closeModal}
+        contentLabel="Athlete Card"
+        className="my-modal"
+        
+      >
+        {athlete && <ProfileCard athlete={athlete} />}
+        <button onClick={closeModal}>Close</button>
+      </Modal>
+    </p>
+  );
+};
+
+
 
 const InvitationDate = ({ date, status }) => (
   <p>
@@ -23,18 +71,42 @@ const InvitationTime = ({ time, status }) => (
   </p>
 );
 
-const InvitationVenue = ({ venue, status }) => (
-  <p>
-    Venue:<Link to={`/venue/${venue.venue_id}`}> {venue.venue_name} </Link>
-    {status === 'Accepted' && <button>Edit Venue</button>}
-  </p>
-);
+const InvitationVenue = ({ venue, status }) => {
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+
+  const openModal = () => {
+    setModalIsOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalIsOpen(false);
+  };
+
+  return (
+    <p>
+      Venue: <Link onClick={openModal}>{venue.venue_name}</Link>
+      {status === 'Accepted' && <button onClick={openModal}>Edit Venue</button>}
+
+      <Modal
+        isOpen={modalIsOpen}
+        onRequestClose={closeModal}
+        contentLabel="Venue Card"
+        className="my-modal"
+      >
+        {venue && <VenueCard venue={venue} />}
+        <button onClick={closeModal}>Close</button>
+      </Modal>
+    </p>
+  );
+};
 
 const MatchInvitationItem = ({ invitation }) => {
   const [senderUser, setSenderUser] = useState({});
   const [venue, setVenue] = useState({});
   const [changedInvitationState, setChangedInvitationState] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
+
+  const [matchCreated, setMatchCreated] = useState(false);
 
   useEffect(() => {
     async function fetchSenderUser(user_id) {
@@ -85,6 +157,28 @@ const MatchInvitationItem = ({ invitation }) => {
     return null; 
   }
 
+  const onCreateMatch = () => {
+    try{
+      axios.post(MATCH_API_URL, 
+        {
+          match_date: invitation.scheduled_date,
+          venue_id: invitation.venue_id,
+          player1_id: invitation.sender_id,
+          player2_id: invitation.recipient_id
+        },
+        { withCredentials: true }
+      )
+      .then((response) => {
+        console.log(response);
+        setMatchCreated(true);
+      })
+    }
+    catch(error){
+      console.error(error);
+    };
+  }
+
+
   return (
     <div>
       <h2>
@@ -101,14 +195,16 @@ const MatchInvitationItem = ({ invitation }) => {
           <button onClick={onDelete}>Delete</button>
         </div>
       )}
-      {invitation.status === 'Accepted' && (
+      {invitation.status === 'Accepted'&& !matchCreated && (
         <div>
-          <button>Create match!</button>
+          <button onClick={onCreateMatch}>Create match!</button>
           <button onClick={onDelete}>Cancel Invitation</button>
         </div>
       )}
+      {matchCreated && <p>Match successfully created!</p>}
+
     </div>
   );
-};
 
+};
 export default MatchInvitationItem;
